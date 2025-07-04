@@ -124,14 +124,14 @@ export default function GroceryPage() {
 
               {/* Right side icons */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                {/* Wishlist Icon */}
+                {/* Shopping List Icon */}
                 <Link
                   href="/wishlist"
                   className="relative p-1 hover:bg-gray-100 rounded-md transition-colors"
-                  title="My Wishlist"
+                  title="Shopping List"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors"
+                    className="w-5 h-5 text-gray-400 hover:text-green-500 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -140,10 +140,10 @@ export default function GroceryPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     />
                   </svg>
-                  {/* Wishlist count badge (optional) */}
+                  {/* Shopping List count badge (optional) */}
                   {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                     3
                   </span> */}
