@@ -3,7 +3,7 @@ import { CartProvider } from "./cart/CartContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "FreshMart - Fresh Groceries Delivered",
+  title: "GrabMart - Fresh Groceries Delivered",
   description: "Fresh groceries delivered to your door",
 };
 

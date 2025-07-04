@@ -45,37 +45,56 @@ export default function GroceryPage() {
         <div className="mb-6">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <svg
-                className="w-8 h-8 text-green-600"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M7 4V2a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v2h4a1 1 0 0 1 0 2h-1.646l-1.703 8.516A3 3 0 0 1 14.725 17H9.275a3 3 0 0 1-2.926-2.484L4.646 6H3a1 1 0 1 1 0-2h4zM9 3v1h6V3H9zM8.266 15.172A1 1 0 0 0 9.275 16h5.45a1 1 0 0 0 .976-.828L16.646 8H7.354l.912 7.172z"/>
-                <circle cx="10" cy="20" r="1"/>
-                <circle cx="15" cy="20" r="1"/>
-              </svg>
-              <h1 className="text-2xl font-bold text-gray-900">FreshMart</h1>
+              <h1 className="text-2xl font-bold text-gray-900">GrabMart</h1>
             </div>
 
-            {/* User Icon */}
-            <Link
-              href="/profile"
-              className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
-            >
-              <svg
-                className="w-6 h-6 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {/* Right side icons */}
+            <div className="flex items-center gap-3">
+              {/* Shopping Cart Icon with Cart Count */}
+              <button
+                onClick={() => setIsCartOpen(true)}
+                className="relative p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-            </Link>
+                <svg
+                  className="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                  />
+                </svg>
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
+              {/* User Icon */}
+              <Link
+                href="/profile"
+                className="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 transition-colors"
+              >
+                <svg
+                  className="w-6 h-6 text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </Link>
+            </div>
           </div>
           <p className="text-gray-600">
             Fresh groceries delivered to your door
@@ -105,13 +124,14 @@ export default function GroceryPage() {
 
               {/* Right side icons */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
-                {/* Shopping List Icon with Cart Count */}
-                <button
-                  onClick={() => setIsCartOpen(true)}
+                {/* Wishlist Icon */}
+                <Link
+                  href="/wishlist"
                   className="relative p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  title="My Wishlist"
                 >
                   <svg
-                    className="w-5 h-5 text-gray-400"
+                    className="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -120,15 +140,14 @@ export default function GroceryPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                      d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
                     />
                   </svg>
-                  {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </button>
+                  {/* Wishlist count badge (optional) */}
+                  {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    3
+                  </span> */}
+                </Link>
 
                 {/* AI Sparkle Button */}
                 <button className="p-1 hover:bg-gray-100 rounded-md transition-colors">
