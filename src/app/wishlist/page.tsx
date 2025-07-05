@@ -14,6 +14,7 @@ export default function WishlistPage() {
   const [toast, setToast] = useState<string>("");
   const [allProducts, setAllProducts] = useState<Product[]>(products);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
+  const [fromOcr, setFromOcr] = useState(false);
   const { addItem, removeItem, updateQuantity, items } = useCart();
 
   // Load all products when component mounts
@@ -32,6 +33,38 @@ export default function WishlistPage() {
     };
 
     loadProducts();
+  }, []);
+
+  // Check if navigated from OCR and load OCR data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const isFromOcr = urlParams.get('from') === 'ocr';
+    
+    if (isFromOcr) {
+      setFromOcr(true);
+      
+      // Load OCR shopping items
+      const ocrItemsJson = localStorage.getItem('ocrShoppingItems');
+      if (ocrItemsJson) {
+        try {
+          const ocrItems: string[] = JSON.parse(ocrItemsJson);
+          setShoppingList(ocrItems);
+          
+          // Clear the localStorage data after loading
+          localStorage.removeItem('ocrShoppingItems');
+          
+          // Show success message
+          setTimeout(() => {
+            showToast(`✅ Added ${ocrItems.length} items from your image to the shopping list!`);
+          }, 500);
+        } catch (error) {
+          console.error('Failed to parse OCR items:', error);
+        }
+      }
+      
+      // Clear the original OCR text from localStorage
+      localStorage.removeItem('ocrOriginalText');
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -240,6 +273,25 @@ export default function WishlistPage() {
             {isCurateMode ? "Curated Products" : "Shopping List"}
           </h1>
         </div>
+        
+        {/* OCR Success Banner */}
+        {fromOcr && (
+          <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-green-800">✨ Items Added from Your Image!</h3>
+                <p className="text-sm text-green-700 mt-1">
+                  We've automatically extracted and added items from your uploaded image to your shopping list.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {!isCurateMode ? (
@@ -363,6 +415,8 @@ export default function WishlistPage() {
               </p>
             </div>
           )}
+
+
 
           {/* Curate Shopping List Button */}
           <div className="mt-8 text-center">

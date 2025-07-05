@@ -6,6 +6,7 @@ import { getBadgeStyles } from "./badge";
 import { useCart } from "./cart/CartContext";
 import CartModal from "./cart/CartModal";
 import { products, loadAllProducts, Product } from "./products";
+import { OCRService, OCRResult } from "./services/ocrService";
 
 export default function GroceryPage() {
   const { addItem, totalItems, items, updateQuantity, removeItem } = useCart();
@@ -15,6 +16,7 @@ export default function GroceryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState<Product[]>(products);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isOCRProcessing, setIsOCRProcessing] = useState(false);
   const itemsPerPage = 15;
 
   // Load all products on component mount
@@ -208,12 +210,102 @@ export default function GroceryPage() {
   };
 
   // Shopping list modal handlers
-  const handleSayIt = () => {
+  const handleSayIt = async () => {
     setIsShoppingListModalOpen(false);
-    // TODO: Implement voice input functionality
-    console.log("Say it functionality - Voice input");
-    // For now, redirect to wishlist page
-    window.location.href = "/wishlist";
+    
+    // Create file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = async (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Check file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image file is too large. Please select a file smaller than 10MB.');
+        return;
+      }
+      
+             setIsOCRProcessing(true);
+      
+      try {
+        // Check if OCR API is available
+        const apiAvailable = await OCRService.isAvailable();
+        if (!apiAvailable) {
+          throw new Error('OCR service is not available. Please make sure the OCR API is running on localhost:8000');
+        }
+        
+        // Process image with OCR
+        const result: OCRResult = await OCRService.extractTextFromImage(file);
+        
+                 if (result.success && result.text) {
+           // Parse the OCR result to find product names
+           const extractedItems = parseShoppingListFromText(result.text);
+           
+           if (extractedItems.length > 0) {
+             // Store the extracted items in localStorage for the wishlist page
+             localStorage.setItem('ocrShoppingItems', JSON.stringify(extractedItems));
+             localStorage.setItem('ocrOriginalText', result.text);
+           } else {
+             // Even if no items found, store the original text
+             localStorage.setItem('ocrOriginalText', result.text);
+           }
+           
+           // Navigate to wishlist page immediately
+           window.location.href = '/wishlist?from=ocr';
+         } else {
+           throw new Error(result.error || 'Failed to extract text from image');
+         }
+             } catch (error) {
+         console.error('OCR Error:', error);
+         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+         alert(`OCR processing failed: ${errorMessage}\n\nPlease try again or use manual entry.`);
+       } finally {
+         setIsOCRProcessing(false);
+       }
+    };
+    
+    // Trigger file selection
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
+  };
+
+  // Helper function to parse shopping list from OCR text
+  const parseShoppingListFromText = (text: string): string[] => {
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const items: string[] = [];
+    
+    for (const line of lines) {
+      // Remove common list markers (-, *, •, numbers)
+      const cleanLine = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.?\s*/, '').trim();
+      
+      if (cleanLine.length > 2 && cleanLine.length < 50) {
+        // Filter out non-product lines (like titles, headers, etc.)
+        const lowerLine = cleanLine.toLowerCase();
+        if (!lowerLine.includes('shopping') && 
+            !lowerLine.includes('list') && 
+            !lowerLine.includes('grocery') &&
+            !lowerLine.includes('store') &&
+            !lowerLine.includes('buy') &&
+            !lowerLine.match(/^\d+$/) && // Just numbers
+            !lowerLine.match(/^[a-z]\.$/) // Single letters
+        ) {
+          items.push(cleanLine);
+        }
+      }
+    }
+    
+    return items.slice(0, 20); // Limit to 20 items
   };
 
   const handleSnapIt = () => {
@@ -391,6 +483,8 @@ export default function GroceryPage() {
             <div className="mt-2 text-xs text-gray-500">
               💡 Smart search: "coca cola", "fruits", "nestle", "australia", "500ml" - Only shows products with &gt;50% relevance
             </div>
+            
+
           </div>
         </div>
 
@@ -446,7 +540,7 @@ export default function GroceryPage() {
             {currentProducts.map((product) => (
             <div
               key={product.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200"
+              className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200 flex flex-col h-full"
             >
               {/* Product Visual */}
               <div
@@ -470,9 +564,9 @@ export default function GroceryPage() {
               </div>
 
               {/* Product Details */}
-              <div className="p-4">
+              <div className="p-4 flex flex-col flex-1">
                 {/* Product Name */}
-                <h3 className="font-semibold text-gray-900 text-sm mb-3 line-clamp-2">
+                <h3 className="font-semibold text-gray-900 text-sm mb-3 line-clamp-2 flex-1">
                   {product.name}
                 </h3>
 
@@ -486,7 +580,7 @@ export default function GroceryPage() {
                 {/* Add to Cart Button */}
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="w-full bg-green-600 text-white text-sm font-medium py-3 px-3 rounded-lg hover:bg-green-700 transition-colors duration-200 active:bg-green-800"
+                  className="w-full bg-green-600 text-white text-sm font-medium py-3 px-3 rounded-lg hover:bg-green-700 transition-colors duration-200 active:bg-green-800 mt-auto"
                 >
                   Add to Cart
                 </button>
@@ -593,10 +687,63 @@ export default function GroceryPage() {
 
             {/* Modal Buttons */}
             <div className="space-y-4">
-              {/* Say It Button */}
+              {/* Snap It Button */}
               <button
                 onClick={handleSayIt}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
+                disabled={isOCRProcessing}
+                className={`w-full rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg ${
+                  isOCRProcessing 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
+              >
+                {isOCRProcessing ? (
+                  <>
+                    <svg
+                      className="w-6 h-6 animate-spin"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                      />
+                    </svg>
+                    <div className="text-left">
+                      <div className="font-semibold text-lg">Processing...</div>
+                      <div className="text-gray-100 text-sm">Extracting text from image</div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <svg
+                      className="w-6 h-6"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      />
+                    </svg>
+                    <div className="text-left">
+                      <div className="font-semibold text-lg">Snap It</div>
+                      <div className="text-blue-100 text-sm">Upload image with your list</div>
+                    </div>
+                  </>
+                )}
+              </button>
+
+              {/* Say It Button */}
+              <button
+                onClick={handleSnapIt}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
               >
                 <svg
                   className="w-6 h-6"
@@ -613,37 +760,7 @@ export default function GroceryPage() {
                 </svg>
                 <div className="text-left">
                   <div className="font-semibold text-lg">Say It</div>
-                  <div className="text-blue-100 text-sm">Use voice to add items</div>
-                </div>
-              </button>
-
-              {/* Snap It Button */}
-              <button
-                onClick={handleSnapIt}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                </svg>
-                <div className="text-left">
-                  <div className="font-semibold text-lg">Snap It</div>
-                  <div className="text-purple-100 text-sm">Take a photo of your list</div>
+                  <div className="text-purple-100 text-sm">Use voice to add items</div>
                 </div>
               </button>
 
