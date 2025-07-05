@@ -1,31 +1,52 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { getBadgeStyles } from "./badge";
 import { useCart } from "./cart/CartContext";
 import CartModal from "./cart/CartModal";
-import { products } from "./products";
+import { products, loadAllProducts, Product } from "./products";
 
 export default function GroceryPage() {
   const { addItem, totalItems, items, updateQuantity, removeItem } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [allProducts, setAllProducts] = useState<Product[]>(products);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const itemsPerPage = 15;
+
+  // Load all products on component mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const loadedProducts = await loadAllProducts();
+        setAllProducts(loadedProducts);
+      } catch (error) {
+        console.error('Failed to load all products:', error);
+        // Fallback to basic products on error
+        setAllProducts(products);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   // Filter products based on search query
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) {
-      return products;
+      return allProducts;
     }
     
     const query = searchQuery.toLowerCase();
-    return products.filter(product => 
+    return allProducts.filter(product => 
       product.name.toLowerCase().includes(query) ||
-      product.badge.toLowerCase().includes(query)
+      product.badge.toLowerCase().includes(query) ||
+      product.brands?.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, allProducts]);
 
   // Calculate pagination based on filtered products
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -103,6 +124,22 @@ export default function GroceryPage() {
       removeItem(productId);
     }
   };
+
+  // Show loading state while products are being loaded
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg className="animate-spin h-12 w-12 mx-auto mb-4 text-green-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading GrabMart</h2>
+          <p className="text-gray-600">Preparing all products for you...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -234,10 +271,6 @@ export default function GroceryPage() {
                       d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     />
                   </svg>
-                  {/* Shopping List count badge (optional) */}
-                  {/* <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                    3
-                  </span> */}
                 </Link>
 
                 {/* AI Sparkle Button */}
@@ -411,8 +444,6 @@ export default function GroceryPage() {
                 </svg>
               </button>
             </div>
-
-
           </div>
         )}
       </div>

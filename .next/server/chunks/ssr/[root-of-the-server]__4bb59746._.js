@@ -108,6 +108,26 @@ const badges = {
         type: "Biscuits",
         bgColor: "bg-amber-100",
         textColor: "text-amber-800"
+    },
+    Other: {
+        type: "Other",
+        bgColor: "bg-gray-100",
+        textColor: "text-gray-800"
+    },
+    Meat: {
+        type: "Meat",
+        bgColor: "bg-red-100",
+        textColor: "text-red-800"
+    },
+    Sweets: {
+        type: "Sweets",
+        bgColor: "bg-pink-100",
+        textColor: "text-pink-800"
+    },
+    Cereals: {
+        type: "Cereals",
+        bgColor: "bg-amber-100",
+        textColor: "text-amber-800"
     }
 };
 const getBadgeStyles = (badgeType)=>{
@@ -567,7 +587,12 @@ function CartModal({ isOpen, onClose }) {
 var { g: global, __dirname } = __turbopack_context__;
 {
 __turbopack_context__.s({
-    "products": (()=>products)
+    "availableCategories": (()=>availableCategories),
+    "getProductsByCategory": (()=>getProductsByCategory),
+    "loadAllProducts": (()=>loadAllProducts),
+    "products": (()=>products),
+    "searchProducts": (()=>searchProducts),
+    "totalProducts": (()=>totalProducts)
 });
 const products = [
     // Fruits
@@ -754,641 +779,58 @@ const products = [
     {
         id: 23,
         name: "Lay's Classic Salted",
-        price: "S$0.35",
+        price: "S$0.45",
         badge: "Snacks",
         color: "from-yellow-300 to-yellow-500",
         icon: "🥔"
     },
     {
         id: 24,
-        name: "Samosa (Frozen)",
-        price: "S$1.30/pack",
-        badge: "Ready to eat",
-        color: "from-amber-300 to-amber-500",
-        icon: "🥟"
-    },
-    {
-        id: 25,
-        name: "Bhujia Sev",
-        price: "S$0.55",
-        badge: "Snacks",
-        color: "from-yellow-500 to-orange-600",
-        icon: "🍜"
-    },
-    // Traditional/Dairy
-    {
-        id: 26,
-        name: "Pure Desi Ghee",
-        price: "S$9.50/kg",
-        badge: "Traditional",
-        color: "from-yellow-400 to-yellow-600",
-        icon: "🧈"
-    },
-    {
-        id: 27,
-        name: "Fresh Paneer",
-        price: "S$5.20/kg",
-        badge: "Dairy",
-        color: "from-gray-100 to-gray-300",
-        icon: "🧀"
-    },
-    {
-        id: 28,
-        name: "Amul Milk 1L",
-        price: "S$1.00",
-        badge: "Dairy",
-        color: "from-blue-200 to-blue-400",
-        icon: "��"
-    },
-    {
-        id: 29,
-        name: "Curd (Dahi) 500g",
-        price: "S$0.55",
-        badge: "Dairy",
-        color: "from-gray-100 to-gray-200",
-        icon: "🥛"
-    },
-    {
-        id: 30,
-        name: "Mango Pickle",
-        price: "S$2.00",
-        badge: "Traditional",
-        color: "from-yellow-500 to-orange-600",
-        icon: "🥭"
-    },
-    // Grains & Pulses
-    {
-        id: 31,
-        name: "Basmati Rice 5kg",
-        price: "S$7.50",
-        badge: "Grains",
-        color: "from-gray-100 to-gray-300",
-        icon: "🍚"
-    },
-    {
-        id: 32,
-        name: "Toor Dal 1kg",
-        price: "S$2.30",
-        badge: "Protein",
-        color: "from-yellow-400 to-yellow-600",
-        icon: "🫘"
-    },
-    {
-        id: 33,
-        name: "Chana Dal 1kg",
-        price: "S$2.00",
-        badge: "Protein",
-        color: "from-yellow-300 to-yellow-500",
-        icon: "🫘"
-    },
-    {
-        id: 34,
-        name: "Moong Dal 1kg",
-        price: "S$2.10",
-        badge: "Protein",
-        color: "from-green-300 to-green-500",
-        icon: "🫘"
-    },
-    {
-        id: 35,
-        name: "Wheat Flour 5kg",
-        price: "S$3.00",
-        badge: "Grains",
-        color: "from-amber-200 to-amber-400",
-        icon: "🌾"
-    },
-    // More Vegetables
-    {
-        id: 36,
-        name: "Fresh Onions",
-        price: "S$0.50/kg",
-        badge: "Vegetables",
-        color: "from-purple-200 to-purple-400",
-        icon: "🧅"
-    },
-    {
-        id: 37,
-        name: "Ginger (Adrak)",
-        price: "S$3.00/kg",
-        badge: "Spicy",
-        color: "from-yellow-400 to-yellow-600",
-        icon: "🫚"
-    },
-    {
-        id: 38,
-        name: "Garlic (Lehsun)",
-        price: "S$3.20/kg",
-        badge: "Spicy",
-        color: "from-gray-200 to-gray-400",
-        icon: "🧄"
-    },
-    {
-        id: 39,
-        name: "Green Chili",
-        price: "S$1.30/kg",
-        badge: "Spicy",
-        color: "from-green-400 to-green-600",
-        icon: "🌶️"
-    },
-    {
-        id: 40,
-        name: "Fresh Tomatoes",
-        price: "S$0.55/kg",
-        badge: "Vegetables",
-        color: "from-red-300 to-red-500",
-        icon: "🍅"
-    },
-    // More Fruits
-    {
-        id: 41,
-        name: "Sweet Oranges",
-        price: "S$1.00/kg",
-        badge: "Fruits",
-        color: "from-orange-300 to-orange-500",
-        icon: "🍊"
-    },
-    {
-        id: 42,
-        name: "Fresh Grapes",
-        price: "S$1.30/kg",
-        badge: "Fruits",
-        color: "from-purple-300 to-purple-500",
-        icon: "🍇"
-    },
-    {
-        id: 43,
-        name: "Apple (Kashmiri)",
-        price: "S$2.00/kg",
-        badge: "Fruits",
-        color: "from-red-300 to-red-500",
-        icon: "🍎"
-    },
-    {
-        id: 44,
-        name: "Watermelon",
-        price: "S$0.40/kg",
-        badge: "Fruits",
-        color: "from-green-300 to-green-500",
-        icon: "🍉"
-    },
-    {
-        id: 45,
-        name: "Sweet Lime (Mosambi)",
-        price: "S$0.65/kg",
-        badge: "Fruits",
-        color: "from-green-200 to-green-400",
-        icon: "🍋"
-    },
-    // More Snacks
-    {
-        id: 46,
-        name: "Maggi Noodles",
-        price: "S$0.23",
-        badge: "Ready to eat",
-        color: "from-yellow-400 to-orange-500",
-        icon: "🍜"
-    },
-    {
-        id: 47,
-        name: "Poha (Flattened Rice)",
-        price: "S$1.00/kg",
-        badge: "Grains",
-        color: "from-gray-100 to-gray-300",
-        icon: "🍚"
-    },
-    {
-        id: 48,
-        name: "Cornflakes",
-        price: "S$3.00",
-        badge: "Ready to eat",
-        color: "from-yellow-300 to-yellow-500",
-        icon: "🥣"
-    },
-    {
-        id: 49,
-        name: "Chocos Cereal",
-        price: "S$3.60",
-        badge: "Sweet",
-        color: "from-amber-400 to-amber-600",
-        icon: "🥣"
-    },
-    {
-        id: 50,
-        name: "Mixture Namkeen",
-        price: "S$0.65",
-        badge: "Snacks",
-        color: "from-orange-400 to-orange-600",
-        icon: "🥨"
-    },
-    // Spices & Masalas
-    {
-        id: 51,
-        name: "MDH Garam Masala",
-        price: "S$0.75",
-        badge: "Spicy",
-        color: "from-red-400 to-red-600",
-        icon: "🌶️"
-    },
-    {
-        id: 52,
-        name: "Turmeric Powder",
-        price: "S$2.00/kg",
-        badge: "Spicy",
-        color: "from-yellow-500 to-yellow-700",
-        icon: "🌿"
-    },
-    {
-        id: 53,
-        name: "Red Chili Powder",
-        price: "S$3.00/kg",
-        badge: "Spicy",
-        color: "from-red-500 to-red-700",
-        icon: "🌶️"
-    },
-    {
-        id: 54,
-        name: "Cumin Seeds (Jeera)",
-        price: "S$5.00/kg",
-        badge: "Spicy",
-        color: "from-amber-500 to-amber-700",
-        icon: "🌿"
-    },
-    {
-        id: 55,
-        name: "Coriander Seeds",
-        price: "S$3.30/kg",
-        badge: "Spicy",
-        color: "from-green-400 to-green-600",
-        icon: "🌿"
-    },
-    // More Traditional Items
-    {
-        id: 56,
-        name: "Papad (Lijjat)",
-        price: "S$0.55",
-        badge: "Traditional",
-        color: "from-yellow-300 to-yellow-500",
-        icon: "🫓"
-    },
-    {
-        id: 57,
-        name: "Coconut Oil 1L",
-        price: "S$3.00",
-        badge: "Traditional",
-        color: "from-gray-100 to-gray-300",
-        icon: "🥥"
-    },
-    {
-        id: 58,
-        name: "Mustard Oil 1L",
-        price: "S$2.30",
-        badge: "Traditional",
-        color: "from-yellow-500 to-yellow-700",
-        icon: "🫗"
-    },
-    {
-        id: 59,
-        name: "Jaggery (Gur) 1kg",
-        price: "S$1.00",
-        badge: "Sweet",
-        color: "from-amber-500 to-amber-700",
-        icon: "🍯"
-    },
-    {
-        id: 60,
-        name: "Rock Salt (Sendha)",
-        price: "S$0.65",
-        badge: "Traditional",
-        color: "from-gray-200 to-gray-400",
-        icon: "🧂"
-    },
-    // More Beverages
-    {
-        id: 61,
-        name: "Frooti Mango Drink",
-        price: "S$0.25",
-        badge: "Beverages",
-        color: "from-orange-300 to-orange-500",
-        icon: "🧃"
-    },
-    {
-        id: 62,
-        name: "Real Fruit Juice",
-        price: "S$0.55",
-        badge: "Beverages",
-        color: "from-purple-300 to-purple-500",
-        icon: "🧃"
-    },
-    {
-        id: 63,
-        name: "Nimbu Paani Mix",
-        price: "S$0.40",
-        badge: "Beverages",
-        color: "from-green-300 to-green-500",
-        icon: "🍋"
-    },
-    {
-        id: 64,
-        name: "Tata Tea Gold",
-        price: "S$3.00/250g",
-        badge: "Beverages",
-        color: "from-amber-400 to-amber-600",
-        icon: "🍵"
-    },
-    {
-        id: 65,
-        name: "Bournvita 500g",
-        price: "S$4.60",
-        badge: "Beverages",
-        color: "from-amber-600 to-amber-800",
-        icon: "☕"
-    },
-    // More Vegetables
-    {
-        id: 66,
-        name: "Capsicum (Shimla Mirch)",
-        price: "S$1.00/kg",
-        badge: "Vegetables",
-        color: "from-green-400 to-green-600",
-        icon: "🫑"
-    },
-    {
-        id: 67,
-        name: "Cauliflower (Gobi)",
-        price: "S$0.65/kg",
-        badge: "Vegetables",
-        color: "from-gray-100 to-gray-300",
-        icon: "🥬"
-    },
-    {
-        id: 68,
-        name: "Cabbage (Patta Gobi)",
-        price: "S$0.40/kg",
-        badge: "Vegetables",
-        color: "from-green-200 to-green-400",
-        icon: "��"
-    },
-    {
-        id: 69,
-        name: "Potato (Aloo)",
-        price: "S$0.40/kg",
-        badge: "Vegetables",
-        color: "from-yellow-200 to-yellow-400",
-        icon: "🥔"
-    },
-    {
-        id: 70,
-        name: "Sweet Potato (Shakarkandi)",
-        price: "S$0.55/kg",
-        badge: "Vegetables",
-        color: "from-orange-300 to-orange-500",
-        icon: "🍠"
-    },
-    // More Dairy
-    {
-        id: 71,
-        name: "Butter 100g",
-        price: "S$0.90",
-        badge: "Dairy",
-        color: "from-yellow-300 to-yellow-500",
-        icon: "🧈"
-    },
-    {
-        id: 72,
-        name: "Fresh Cream 200ml",
-        price: "S$0.75",
-        badge: "Dairy",
-        color: "from-gray-100 to-gray-200",
-        icon: "🥛"
-    },
-    {
-        id: 73,
-        name: "Cheese Slice",
-        price: "S$2.00",
-        badge: "Dairy",
-        color: "from-yellow-200 to-yellow-400",
-        icon: "🧀"
-    },
-    {
-        id: 74,
-        name: "Buttermilk (Chaas)",
-        price: "S$0.33",
-        badge: "Dairy",
-        color: "from-blue-100 to-blue-300",
-        icon: "🥛"
-    },
-    {
-        id: 75,
-        name: "Ice Cream (Kulfi)",
-        price: "S$0.55",
-        badge: "Sweet",
-        color: "from-pink-300 to-pink-500",
-        icon: "🍦"
-    },
-    // More Snacks & Ready to Eat
-    {
-        id: 76,
-        name: "Banana Chips",
-        price: "S$2.00/kg",
-        badge: "Snacks",
-        color: "from-yellow-400 to-yellow-600",
-        icon: "🍌"
-    },
-    {
-        id: 77,
-        name: "Coconut Laddu",
-        price: "S$4.00/kg",
-        badge: "Sweet",
-        color: "from-gray-100 to-gray-300",
-        icon: "🥥"
-    },
-    {
-        id: 78,
-        name: "Gulab Jamun Mix",
-        price: "S$0.75",
-        badge: "Sweet",
-        color: "from-amber-400 to-amber-600",
-        icon: "🍯"
-    },
-    {
-        id: 79,
-        name: "Khakhras",
-        price: "S$1.30",
-        badge: "Snacks",
-        color: "from-yellow-300 to-yellow-500",
+        name: "Britannia Good Day",
+        price: "S$0.30",
+        badge: "Biscuits",
+        color: "from-orange-200 to-orange-400",
         icon: "🍪"
     },
     {
-        id: 80,
-        name: "Mathri",
-        price: "S$3.00/kg",
-        badge: "Snacks",
-        color: "from-amber-300 to-amber-500",
-        icon: "🥨"
-    },
-    // More Grains & Pulses
-    {
-        id: 81,
-        name: "Black Gram (Urad Dal)",
-        price: "S$2.50/kg",
-        badge: "Protein",
-        color: "from-gray-600 to-gray-800",
-        icon: "🫘"
-    },
-    {
-        id: 82,
-        name: "Kidney Beans (Rajma)",
-        price: "S$2.60/kg",
-        badge: "Protein",
-        color: "from-red-400 to-red-600",
-        icon: "🫘"
-    },
-    {
-        id: 83,
-        name: "Chickpeas (Kabuli Chana)",
-        price: "S$2.00/kg",
-        badge: "Protein",
-        color: "from-yellow-300 to-yellow-500",
-        icon: "🫘"
-    },
-    {
-        id: 84,
-        name: "Black Mustard Seeds",
-        price: "S$3.00/kg",
-        badge: "Spicy",
-        color: "from-gray-600 to-gray-800",
-        icon: "🌿"
-    },
-    {
-        id: 85,
-        name: "Fenugreek Seeds (Methi)",
-        price: "S$3.60/kg",
-        badge: "Spicy",
-        color: "from-green-500 to-green-700",
-        icon: "🌿"
-    },
-    // More Traditional Items
-    {
-        id: 86,
-        name: "Hing (Asafoetida)",
-        price: "S$13.00/100g",
-        badge: "Spicy",
-        color: "from-yellow-600 to-yellow-800",
-        icon: "🌿"
-    },
-    {
-        id: 87,
-        name: "Tamarind (Imli)",
-        price: "S$2.00/kg",
-        badge: "Traditional",
-        color: "from-amber-600 to-amber-800",
-        icon: "🫐"
-    },
-    {
-        id: 88,
-        name: "Dry Coconut (Copra)",
-        price: "S$3.00/kg",
-        badge: "Traditional",
-        color: "from-gray-100 to-gray-300",
-        icon: "🥥"
-    },
-    {
-        id: 89,
-        name: "Sesame Seeds (Til)",
-        price: "S$2.60/kg",
-        badge: "Traditional",
-        color: "from-yellow-200 to-yellow-400",
-        icon: "🌿"
-    },
-    {
-        id: 90,
-        name: "Cashew Nuts",
-        price: "S$13.00/kg",
-        badge: "Traditional",
-        color: "from-yellow-100 to-yellow-300",
-        icon: "🥜"
-    },
-    // Last 10 Products
-    {
-        id: 91,
-        name: "Almonds (Badam)",
-        price: "S$15.00/kg",
-        badge: "Traditional",
-        color: "from-amber-200 to-amber-400",
-        icon: "🥜"
-    },
-    {
-        id: 92,
-        name: "Raisins (Kishmish)",
-        price: "S$5.80/kg",
-        badge: "Sweet",
-        color: "from-purple-300 to-purple-500",
-        icon: "🍇"
-    },
-    {
-        id: 93,
-        name: "Dates (Khajur)",
-        price: "S$4.60/kg",
-        badge: "Sweet",
-        color: "from-amber-500 to-amber-700",
-        icon: "🫐"
-    },
-    {
-        id: 94,
-        name: "Pistachios (Pista)",
-        price: "S$20.00/kg",
-        badge: "Traditional",
-        color: "from-green-300 to-green-500",
-        icon: "🥜"
-    },
-    {
-        id: 95,
-        name: "Walnuts (Akhrot)",
-        price: "S$16.00/kg",
-        badge: "Traditional",
-        color: "from-amber-400 to-amber-600",
-        icon: "🥜"
-    },
-    {
-        id: 96,
-        name: "Fig (Anjeer)",
-        price: "S$13.00/kg",
-        badge: "Sweet",
-        color: "from-purple-400 to-purple-600",
-        icon: "🫐"
-    },
-    {
-        id: 97,
-        name: "Saffron (Kesar)",
-        price: "S$41.00/100g",
-        badge: "Traditional",
-        color: "from-yellow-600 to-orange-600",
-        icon: "🌿"
-    },
-    {
-        id: 98,
-        name: "Green Cardamom (Elaichi)",
-        price: "S$30.00/kg",
-        badge: "Spicy",
-        color: "from-green-400 to-green-600",
-        icon: "🌿"
-    },
-    {
-        id: 99,
-        name: "Cinnamon (Dalchini)",
-        price: "S$10.00/kg",
-        badge: "Spicy",
-        color: "from-amber-500 to-amber-700",
-        icon: "🌿"
-    },
-    {
-        id: 100,
-        name: "Star Anise (Chakra Phool)",
-        price: "S$6.50/kg",
-        badge: "Spicy",
-        color: "from-amber-600 to-amber-800",
-        icon: "⭐"
+        id: 25,
+        name: "Amul Fresh Milk",
+        price: "S$0.85/ltr",
+        badge: "Dairy",
+        color: "from-blue-100 to-blue-300",
+        icon: "🥛"
     }
+];
+// Async function to load all products from API
+let allProductsCache = null;
+async function loadAllProducts() {
+    if (allProductsCache) {
+        return allProductsCache;
+    }
+    try {
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+            throw new Error('Failed to load products');
+        }
+        const loadedProducts = await response.json();
+        allProductsCache = loadedProducts;
+        return loadedProducts;
+    } catch (error) {
+        console.error('Error loading products:', error);
+        // Fallback to default products if API fails
+        return products;
+    }
+}
+function getProductsByCategory(category, productList = products) {
+    return productList.filter((product)=>product.badge === category);
+}
+function searchProducts(query, productList = products) {
+    const lowercaseQuery = query.toLowerCase();
+    return productList.filter((product)=>product.name.toLowerCase().includes(lowercaseQuery) || product.brands?.toLowerCase().includes(lowercaseQuery) || product.categories?.toLowerCase().includes(lowercaseQuery));
+}
+const totalProducts = products.length;
+const availableCategories = [
+    ...new Set(products.map((p)=>p.badge))
 ];
 }}),
 "[project]/src/app/page.tsx [app-ssr] (ecmascript)": ((__turbopack_context__) => {
@@ -1419,16 +861,35 @@ function GroceryPage() {
     const [isCartOpen, setIsCartOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
     const [currentPage, setCurrentPage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1);
     const [searchQuery, setSearchQuery] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])("");
+    const [allProducts, setAllProducts] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"]);
+    const [isInitialLoading, setIsInitialLoading] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(true);
     const itemsPerPage = 15;
+    // Load all products on component mount
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useEffect"])(()=>{
+        const loadProducts = async ()=>{
+            try {
+                const loadedProducts = await (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["loadAllProducts"])();
+                setAllProducts(loadedProducts);
+            } catch (error) {
+                console.error('Failed to load all products:', error);
+                // Fallback to basic products on error
+                setAllProducts(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"]);
+            } finally{
+                setIsInitialLoading(false);
+            }
+        };
+        loadProducts();
+    }, []);
     // Filter products based on search query
     const filteredProducts = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
         if (!searchQuery.trim()) {
-            return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"];
+            return allProducts;
         }
         const query = searchQuery.toLowerCase();
-        return __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].filter((product)=>product.name.toLowerCase().includes(query) || product.badge.toLowerCase().includes(query));
+        return allProducts.filter((product)=>product.name.toLowerCase().includes(query) || product.badge.toLowerCase().includes(query) || product.brands?.toLowerCase().includes(query));
     }, [
-        searchQuery
+        searchQuery,
+        allProducts
     ]);
     // Calculate pagination based on filtered products
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
@@ -1503,6 +964,73 @@ function GroceryPage() {
             removeItem(productId);
         }
     };
+    // Show loading state while products are being loaded
+    if (isInitialLoading) {
+        return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+            className: "min-h-screen bg-green-50 flex items-center justify-center",
+            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                className: "text-center",
+                children: [
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                        className: "animate-spin h-12 w-12 mx-auto mb-4 text-green-600",
+                        fill: "none",
+                        viewBox: "0 0 24 24",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("circle", {
+                                className: "opacity-25",
+                                cx: "12",
+                                cy: "12",
+                                r: "10",
+                                stroke: "currentColor",
+                                strokeWidth: "4"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 134,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                className: "opacity-75",
+                                fill: "currentColor",
+                                d: "M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            }, void 0, false, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 135,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.tsx",
+                        lineNumber: 133,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h2", {
+                        className: "text-xl font-semibold text-gray-900 mb-2",
+                        children: "Loading GrabMart"
+                    }, void 0, false, {
+                        fileName: "[project]/src/app/page.tsx",
+                        lineNumber: 137,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                        className: "text-gray-600",
+                        children: "Preparing all products for you..."
+                    }, void 0, false, {
+                        fileName: "[project]/src/app/page.tsx",
+                        lineNumber: 138,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "[project]/src/app/page.tsx",
+                lineNumber: 132,
+                columnNumber: 9
+            }, this)
+        }, void 0, false, {
+            fileName: "[project]/src/app/page.tsx",
+            lineNumber: 131,
+            columnNumber: 7
+        }, this);
+    }
     return /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
         children: [
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1521,12 +1049,12 @@ function GroceryPage() {
                                             children: "GrabMart"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 114,
+                                            lineNumber: 151,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 113,
+                                        lineNumber: 150,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1548,12 +1076,12 @@ function GroceryPage() {
                                                             d: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/page.tsx",
-                                                            lineNumber: 130,
+                                                            lineNumber: 167,
                                                             columnNumber: 19
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 124,
+                                                        lineNumber: 161,
                                                         columnNumber: 17
                                                     }, this),
                                                     totalItems > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1561,13 +1089,13 @@ function GroceryPage() {
                                                         children: totalItems
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 138,
+                                                        lineNumber: 175,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 120,
+                                                lineNumber: 157,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1585,29 +1113,29 @@ function GroceryPage() {
                                                         d: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 155,
+                                                        lineNumber: 192,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 149,
+                                                    lineNumber: 186,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 145,
+                                                lineNumber: 182,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 118,
+                                        lineNumber: 155,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 112,
+                                lineNumber: 149,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1615,7 +1143,7 @@ function GroceryPage() {
                                 children: "Fresh groceries delivered to your door"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 165,
+                                lineNumber: 202,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1635,12 +1163,12 @@ function GroceryPage() {
                                                 d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 178,
+                                                lineNumber: 215,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 172,
+                                            lineNumber: 209,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1651,7 +1179,7 @@ function GroceryPage() {
                                             onChange: handleSearchChange
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 185,
+                                            lineNumber: 222,
                                             columnNumber: 15
                                         }, this),
                                         searchQuery && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1670,17 +1198,17 @@ function GroceryPage() {
                                                     d: "M6 18L18 6M6 6l12 12"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 206,
+                                                    lineNumber: 243,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 200,
+                                                lineNumber: 237,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 195,
+                                            lineNumber: 232,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1702,17 +1230,17 @@ function GroceryPage() {
                                                             d: "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/page.tsx",
-                                                            lineNumber: 230,
+                                                            lineNumber: 267,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 224,
+                                                        lineNumber: 261,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 219,
+                                                    lineNumber: 256,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1726,55 +1254,55 @@ function GroceryPage() {
                                                                 d: "M12 0l3.09 6.91L22 10l-6.91 3.09L12 20l-3.09-6.91L2 10l6.91-3.09L12 0z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 250,
+                                                                lineNumber: 283,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                                                 d: "M19 1l1.5 3.5L24 6l-3.5 1.5L19 11l-1.5-3.5L14 6l3.5-1.5L19 1z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 251,
+                                                                lineNumber: 284,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                                                 d: "M7 4l1 2L10 7l-2 1L7 10l-1-2L4 7l2-1L7 4z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 252,
+                                                                lineNumber: 285,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 245,
+                                                        lineNumber: 278,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 244,
+                                                    lineNumber: 277,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 217,
+                                            lineNumber: 254,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 171,
+                                    lineNumber: 208,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 170,
+                                lineNumber: 207,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 111,
+                        lineNumber: 148,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1793,7 +1321,7 @@ function GroceryPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 262,
+                                lineNumber: 295,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1806,13 +1334,13 @@ function GroceryPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 265,
+                                lineNumber: 298,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 261,
+                        lineNumber: 294,
                         columnNumber: 9
                     }, this),
                     filteredProducts.length === 0 && searchQuery && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1832,17 +1360,17 @@ function GroceryPage() {
                                         d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 280,
+                                        lineNumber: 313,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 274,
+                                    lineNumber: 307,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 273,
+                                lineNumber: 306,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1850,7 +1378,7 @@ function GroceryPage() {
                                 children: "No products found"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 288,
+                                lineNumber: 321,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1862,7 +1390,7 @@ function GroceryPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 291,
+                                lineNumber: 324,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1871,13 +1399,13 @@ function GroceryPage() {
                                 children: "Clear Search"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 294,
+                                lineNumber: 327,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 272,
+                        lineNumber: 305,
                         columnNumber: 11
                     }, this),
                     filteredProducts.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1893,7 +1421,7 @@ function GroceryPage() {
                                                 children: product.icon
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 316,
+                                                lineNumber: 349,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1903,18 +1431,18 @@ function GroceryPage() {
                                                     children: product.badge
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 322,
+                                                    lineNumber: 355,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 321,
+                                                lineNumber: 354,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 312,
+                                        lineNumber: 345,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1925,7 +1453,7 @@ function GroceryPage() {
                                                 children: product.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 335,
+                                                lineNumber: 368,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1935,12 +1463,12 @@ function GroceryPage() {
                                                     children: product.price
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 341,
+                                                    lineNumber: 374,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 340,
+                                                lineNumber: 373,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1949,24 +1477,24 @@ function GroceryPage() {
                                                 children: "Add to Cart"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 347,
+                                                lineNumber: 380,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 333,
+                                        lineNumber: 366,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, product.id, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 307,
+                                lineNumber: 340,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 305,
+                        lineNumber: 338,
                         columnNumber: 11
                     }, this),
                     totalPages > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1982,7 +1510,7 @@ function GroceryPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 363,
+                                lineNumber: 396,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2004,17 +1532,17 @@ function GroceryPage() {
                                                 d: "M15 19l-7-7 7-7"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 380,
+                                                lineNumber: 413,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 379,
+                                            lineNumber: 412,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 370,
+                                        lineNumber: 403,
                                         columnNumber: 15
                                     }, this),
                                     pageNumbers.map((page)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2023,7 +1551,7 @@ function GroceryPage() {
                                             children: page
                                         }, page, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 386,
+                                            lineNumber: 419,
                                             columnNumber: 17
                                         }, this)),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2042,35 +1570,35 @@ function GroceryPage() {
                                                 d: "M9 5l7 7-7 7"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 410,
+                                                lineNumber: 443,
                                                 columnNumber: 19
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 409,
+                                            lineNumber: 442,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 400,
+                                        lineNumber: 433,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 368,
+                                lineNumber: 401,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 361,
+                        lineNumber: 394,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 109,
+                lineNumber: 146,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$cart$2f$CartModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -2078,7 +1606,7 @@ function GroceryPage() {
                 onClose: ()=>setIsCartOpen(false)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 421,
+                lineNumber: 452,
                 columnNumber: 7
             }, this)
         ]

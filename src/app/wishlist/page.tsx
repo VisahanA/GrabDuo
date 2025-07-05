@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { products } from "../products";
+import { useState, useEffect } from "react";
+import { products, loadAllProducts, Product } from "../products";
 import { getBadgeStyles } from "../badge";
 import { useCart } from "../cart/CartContext";
 
@@ -12,7 +12,27 @@ export default function WishlistPage() {
   const [isCurateMode, setIsCurateMode] = useState(false);
   const [curatedProducts, setCuratedProducts] = useState<any[]>([]);
   const [toast, setToast] = useState<string>("");
+  const [allProducts, setAllProducts] = useState<Product[]>(products);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { addItem, removeItem, updateQuantity, items } = useCart();
+
+  // Load all products on component mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const loadedProducts = await loadAllProducts();
+        setAllProducts(loadedProducts);
+      } catch (error) {
+        console.error('Failed to load all products:', error);
+        // Fallback to basic products on error
+        setAllProducts(products);
+      } finally {
+        setIsInitialLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewItemInput(e.target.value);
@@ -50,20 +70,23 @@ export default function WishlistPage() {
       return;
     }
 
-    // Match shopping list items with products
-    const matchedProducts = products.filter(product => {
+    // Match shopping list items with products using the full product catalog
+    const matchedProducts = allProducts.filter(product => {
       return shoppingList.some(item => {
         // Check if any shopping list item matches product name (case insensitive)
         return product.name.toLowerCase().includes(item.toLowerCase()) ||
                item.toLowerCase().includes(product.name.toLowerCase().split(' ')[0]) ||
                product.badge.toLowerCase().includes(item.toLowerCase()) ||
-               item.toLowerCase().includes(product.badge.toLowerCase());
+               item.toLowerCase().includes(product.badge.toLowerCase()) ||
+               // Also check brands if available
+               (product.brands && product.brands.toLowerCase().includes(item.toLowerCase())) ||
+               (product.brands && item.toLowerCase().includes(product.brands.toLowerCase()));
       });
     });
 
     // If no direct matches, try broader category matching
     if (matchedProducts.length === 0) {
-      const categoryMatches = products.filter(product => {
+      const categoryMatches = allProducts.filter(product => {
         return shoppingList.some(item => {
           const itemWords = item.toLowerCase().split(' ');
           const productWords = product.name.toLowerCase().split(' ');
@@ -76,9 +99,9 @@ export default function WishlistPage() {
           );
         });
       });
-      setCuratedProducts(categoryMatches.slice(0, 10)); // Limit to 10 products
+      setCuratedProducts(categoryMatches.slice(0, 20)); // Limit to 20 products
     } else {
-      setCuratedProducts(matchedProducts);
+      setCuratedProducts(matchedProducts.slice(0, 20)); // Limit to 20 products
     }
 
     setIsCurateMode(true);
@@ -116,6 +139,22 @@ export default function WishlistPage() {
       }
     }
   };
+
+  // Show loading state while products are being loaded
+  if (isInitialLoading) {
+    return (
+      <div className="min-h-screen bg-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <svg className="animate-spin h-12 w-12 mx-auto mb-4 text-green-600" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Loading Shopping List</h2>
+          <p className="text-gray-600">Preparing all products for curation...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-green-50 px-4 py-6">
@@ -156,6 +195,13 @@ export default function WishlistPage() {
             {isCurateMode ? "Curated Products" : "Shopping List"}
           </h1>
         </div>
+        {/* Product count indicator */}
+        <p className="text-sm text-gray-600 mt-2">
+          {isCurateMode 
+            ? `Found ${curatedProducts.length} matching products from ${allProducts.length} total products`
+            : `Access to ${allProducts.length} products for curation`
+          }
+        </p>
       </div>
 
       {!isCurateMode ? (
@@ -186,6 +232,7 @@ export default function WishlistPage() {
                 onKeyPress={handleKeyPress}
                 className={`w-full ${shoppingList.length > 0 ? 'pl-10' : 'pl-4'} pr-24 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-500`}
               />
+              
               {newItemInput && (
                 <button
                   onClick={handleClearInput}
@@ -281,32 +328,34 @@ export default function WishlistPage() {
           )}
 
           {/* Curate Shopping List Button */}
-          <div className="mt-8 text-center">
-            <button 
-              onClick={handleCurateShoppingList}
-              disabled={shoppingList.length === 0}
-              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors font-medium ${
-                shoppingList.length === 0 
-                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
-                  : 'bg-green-600 text-white hover:bg-green-700'
-              }`}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+          {shoppingList.length > 0 && (
+            <div className="text-center mt-8">
+              <button 
+                onClick={handleCurateShoppingList}
+                disabled={shoppingList.length === 0}
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors font-medium ${
+                  shoppingList.length === 0 
+                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
-                />
-              </svg>
-              Curate Shopping List
-            </button>
-          </div>
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                  />
+                </svg>
+                Curate Shopping List
+              </button>
+            </div>
+          )}
         </>
       ) : (
         /* Curated Products View */
@@ -361,136 +410,101 @@ export default function WishlistPage() {
 
                       {/* Product Details */}
                       <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-semibold text-gray-900 text-lg mb-2">
-                              {product.name}
-                            </h4>
-                            <span
-                              className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(product.badge)}`}
-                            >
-                              {product.badge}
+                        <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2">
+                          {product.name}
+                        </h4>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span
+                            className={`px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(
+                              product.badge
+                            )}`}
+                          >
+                            {product.badge}
+                          </span>
+                          {product.brands && (
+                            <span className="text-xs text-gray-500">
+                              {product.brands}
                             </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-bold text-green-600 text-xl">
-                              {product.price}
-                            </span>
+                          )}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-green-600">
+                            {product.price}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            {(() => {
+                              const cartItem = items.find(item => item.id === product.id);
+                              const quantity = cartItem ? cartItem.quantity : 0;
+                              
+                              return quantity > 0 ? (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    onClick={() => handleDecreaseQuantity(product)}
+                                    className="w-8 h-8 rounded-full bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors"
+                                  >
+                                    <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                                    </svg>
+                                  </button>
+                                  <span className="w-8 text-center text-sm font-medium text-gray-700">
+                                    {quantity}
+                                  </span>
+                                  <button
+                                    onClick={() => handleIncreaseQuantity(product)}
+                                    className="w-8 h-8 rounded-full bg-green-600 hover:bg-green-700 flex items-center justify-center transition-colors"
+                                  >
+                                    <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => handleAddToCart(product)}
+                                  className="bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                                >
+                                  Add to Cart
+                                </button>
+                              );
+                            })()}
                           </div>
                         </div>
                       </div>
-
-                      {/* Quantity Controls */}
-                      {(() => {
-                        const cartItem = items.find(item => item.id === product.id);
-                        const quantity = cartItem ? cartItem.quantity : 0;
-                        
-                        if (quantity === 0) {
-                          return (
-                            <button
-                              onClick={() => handleIncreaseQuantity(product)}
-                              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                              title="Add to cart"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                                />
-                              </svg>
-                              <span className="text-sm">Add</span>
-                            </button>
-                          );
-                        }
-                        
-                        return (
-                          <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
-                            <button
-                              onClick={() => handleDecreaseQuantity(product)}
-                              className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors flex-shrink-0"
-                              title="Decrease quantity"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M20 12H4"
-                                />
-                              </svg>
-                            </button>
-                            <span className="px-2 py-1 text-gray-900 font-bold text-sm min-w-[28px] text-center flex-shrink-0">
-                              {quantity}
-                            </span>
-                            <button
-                              onClick={() => handleIncreaseQuantity(product)}
-                              className="w-7 h-7 flex items-center justify-center bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex-shrink-0"
-                              title="Increase quantity"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M12 4v16m8-8H4"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        );
-                      })()}
                     </div>
                   </div>
-                                  ))}
-                </div>
-                
-                {/* Go to Cart Button */}
-                {items.length > 0 && (
-                  <div className="text-center">
-                    <Link
-                      href="/cart"
-                      className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
-                      Go to Cart
-                      {items.length > 0 && (
-                        <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                          {items.reduce((total, item) => total + item.quantity, 0)}
-                        </span>
-                      )}
-                    </Link>
-                  </div>
-                )}
+                ))}
               </div>
+
+              {/* Go to Cart Button */}
+              {items.length > 0 && (
+                <div className="text-center">
+                  <Link
+                    href="/cart"
+                    className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      />
+                    </svg>
+                    Go to Cart
+                    {items.length > 0 && (
+                      <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {items.reduce((total, item) => total + item.quantity, 0)}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              )}
+            </div>
           ) : (
             /* No Matches Found */
             <div className="text-center py-16">

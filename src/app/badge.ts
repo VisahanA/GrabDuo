@@ -13,7 +13,11 @@ export type BadgeType =
   | "Grains"
   | "Vegetables"
   | "Fruits"
-  | "Biscuits";
+  | "Biscuits"
+  | "Other"
+  | "Meat"
+  | "Sweets"
+  | "Cereals";
 
 export interface Badge {
   type: BadgeType;
@@ -94,6 +98,26 @@ export const badges: Record<BadgeType, Badge> = {
   },
   Biscuits: {
     type: "Biscuits",
+    bgColor: "bg-amber-100",
+    textColor: "text-amber-800",
+  },
+  Other: {
+    type: "Other",
+    bgColor: "bg-gray-100",
+    textColor: "text-gray-800",
+  },
+  Meat: {
+    type: "Meat",
+    bgColor: "bg-red-100",
+    textColor: "text-red-800",
+  },
+  Sweets: {
+    type: "Sweets",
+    bgColor: "bg-pink-100",
+    textColor: "text-pink-800",
+  },
+  Cereals: {
+    type: "Cereals",
     bgColor: "bg-amber-100",
     textColor: "text-amber-800",
   },
