@@ -14,7 +14,7 @@ export const products: Product[] = [
   {
     id: 1,
     name: "Fresh Mango (Alphonso)",
-    price: "₹80/kg",
+    price: "S$1.30/kg",
     badge: "Fruits",
     color: "from-yellow-300 to-orange-400",
     icon: "🥭",
@@ -22,7 +22,7 @@ export const products: Product[] = [
   {
     id: 2,
     name: "Sweet Guava",
-    price: "₹40/kg",
+    price: "S$0.65/kg",
     badge: "Fruits",
     color: "from-green-200 to-green-400",
     icon: "🍈",
@@ -30,7 +30,7 @@ export const products: Product[] = [
   {
     id: 3,
     name: "Fresh Pomegranate",
-    price: "₹120/kg",
+    price: "S$1.95/kg",
     badge: "Fruits",
     color: "from-red-300 to-red-500",
     icon: "🍎",
@@ -38,7 +38,7 @@ export const products: Product[] = [
   {
     id: 4,
     name: "Kesar Banana",
-    price: "₹60/dozen",
+    price: "S$0.95/dozen",
     badge: "Fruits",
     color: "from-yellow-200 to-yellow-400",
     icon: "🍌",
@@ -46,7 +46,7 @@ export const products: Product[] = [
   {
     id: 5,
     name: "Fresh Papaya",
-    price: "₹30/kg",
+    price: "S$0.50/kg",
     badge: "Fruits",
     color: "from-orange-200 to-orange-400",
     icon: "🍊",
@@ -56,7 +56,7 @@ export const products: Product[] = [
   {
     id: 6,
     name: "Lady Finger (Bhindi)",
-    price: "₹40/kg",
+    price: "S$0.65/kg",
     badge: "Vegetables",
     color: "from-green-300 to-green-500",
     icon: "🥒",
@@ -64,7 +64,7 @@ export const products: Product[] = [
   {
     id: 7,
     name: "Brinjal (Baingan)",
-    price: "₹35/kg",
+    price: "S$0.55/kg",
     badge: "Vegetables",
     color: "from-purple-300 to-purple-500",
     icon: "🍆",
@@ -72,7 +72,7 @@ export const products: Product[] = [
   {
     id: 8,
     name: "Bitter Gourd (Karela)",
-    price: "₹45/kg",
+    price: "S$0.75/kg",
     badge: "Vegetables",
     color: "from-green-400 to-green-600",
     icon: "🥬",
@@ -80,7 +80,7 @@ export const products: Product[] = [
   {
     id: 9,
     name: "Bottle Gourd (Lauki)",
-    price: "₹25/kg",
+    price: "S$0.40/kg",
     badge: "Vegetables",
     color: "from-green-200 to-green-400",
     icon: "🥒",
@@ -88,7 +88,7 @@ export const products: Product[] = [
   {
     id: 10,
     name: "Drumstick (Moringa)",
-    price: "₹60/kg",
+    price: "S$0.95/kg",
     badge: "Vegetables",
     color: "from-green-300 to-green-500",
     icon: "🌿",
@@ -98,7 +98,7 @@ export const products: Product[] = [
   {
     id: 11,
     name: "Coca Cola 600ml",
-    price: "₹40",
+    price: "S$0.65",
     badge: "Beverages",
     color: "from-red-400 to-red-600",
     icon: "🥤",
@@ -106,7 +106,7 @@ export const products: Product[] = [
   {
     id: 12,
     name: "Pepsi 600ml",
-    price: "₹40",
+    price: "S$0.65",
     badge: "Beverages",
     color: "from-blue-400 to-blue-600",
     icon: "🥤",
@@ -114,7 +114,7 @@ export const products: Product[] = [
   {
     id: 13,
     name: "Thums Up 600ml",
-    price: "₹40",
+    price: "S$0.65",
     badge: "Beverages",
     color: "from-gray-600 to-gray-800",
     icon: "🥤",
@@ -122,7 +122,7 @@ export const products: Product[] = [
   {
     id: 14,
     name: "Masala Chai",
-    price: "₹15/cup",
+    price: "S$0.25/cup",
     badge: "Beverages",
     color: "from-amber-300 to-amber-500",
     icon: "☕",
@@ -130,7 +130,7 @@ export const products: Product[] = [
   {
     id: 15,
     name: "Sweet Lassi",
-    price: "₹30",
+    price: "S$0.50",
     badge: "Dairy",
     color: "from-pink-200 to-pink-400",
     icon: "🥛",
@@ -140,7 +140,7 @@ export const products: Product[] = [
   {
     id: 16,
     name: "Parle-G Original",
-    price: "₹10",
+    price: "S$0.15",
     badge: "Biscuits",
     color: "from-yellow-200 to-yellow-400",
     icon: "🍪",
@@ -148,7 +148,7 @@ export const products: Product[] = [
   {
     id: 17,
     name: "Monaco Salted Biscuits",
-    price: "₹15",
+    price: "S$0.25",
     badge: "Biscuits",
     color: "from-orange-200 to-orange-400",
     icon: "🍪",
@@ -156,7 +156,7 @@ export const products: Product[] = [
   {
     id: 18,
     name: "Good Day Cashew",
-    price: "₹25",
+    price: "S$0.40",
     badge: "Biscuits",
     color: "from-amber-200 to-amber-400",
     icon: "🍪",
@@ -164,7 +164,7 @@ export const products: Product[] = [
   {
     id: 19,
     name: "Oreo Cookies",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Biscuits",
     color: "from-gray-600 to-gray-800",
     icon: "🍪",
@@ -172,7 +172,7 @@ export const products: Product[] = [
   {
     id: 20,
     name: "Marie Gold Biscuits",
-    price: "₹30",
+    price: "S$0.50",
     badge: "Biscuits",
     color: "from-yellow-300 to-yellow-500",
     icon: "🍪",
@@ -182,7 +182,7 @@ export const products: Product[] = [
   {
     id: 21,
     name: "Haldiram's Namkeen",
-    price: "₹45",
+    price: "S$0.75",
     badge: "Snacks",
     color: "from-yellow-400 to-orange-500",
     icon: "🥨",
@@ -190,7 +190,7 @@ export const products: Product[] = [
   {
     id: 22,
     name: "Kurkure Masala Munch",
-    price: "₹20",
+    price: "S$0.35",
     badge: "Snacks",
     color: "from-orange-400 to-red-500",
     icon: "🌽",
@@ -198,7 +198,7 @@ export const products: Product[] = [
   {
     id: 23,
     name: "Lay's Classic Salted",
-    price: "₹20",
+    price: "S$0.35",
     badge: "Snacks",
     color: "from-yellow-300 to-yellow-500",
     icon: "🥔",
@@ -206,7 +206,7 @@ export const products: Product[] = [
   {
     id: 24,
     name: "Samosa (Frozen)",
-    price: "₹80/pack",
+    price: "S$1.30/pack",
     badge: "Ready to eat",
     color: "from-amber-300 to-amber-500",
     icon: "🥟",
@@ -214,7 +214,7 @@ export const products: Product[] = [
   {
     id: 25,
     name: "Bhujia Sev",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Snacks",
     color: "from-yellow-500 to-orange-600",
     icon: "🍜",
@@ -224,7 +224,7 @@ export const products: Product[] = [
   {
     id: 26,
     name: "Pure Desi Ghee",
-    price: "₹580/kg",
+    price: "S$9.50/kg",
     badge: "Traditional",
     color: "from-yellow-400 to-yellow-600",
     icon: "🧈",
@@ -232,7 +232,7 @@ export const products: Product[] = [
   {
     id: 27,
     name: "Fresh Paneer",
-    price: "₹320/kg",
+    price: "S$5.20/kg",
     badge: "Dairy",
     color: "from-gray-100 to-gray-300",
     icon: "🧀",
@@ -240,15 +240,15 @@ export const products: Product[] = [
   {
     id: 28,
     name: "Amul Milk 1L",
-    price: "₹62",
+    price: "S$1.00",
     badge: "Dairy",
     color: "from-blue-200 to-blue-400",
-    icon: "🥛",
+    icon: "��",
   },
   {
     id: 29,
     name: "Curd (Dahi) 500g",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Dairy",
     color: "from-gray-100 to-gray-200",
     icon: "🥛",
@@ -256,7 +256,7 @@ export const products: Product[] = [
   {
     id: 30,
     name: "Mango Pickle",
-    price: "₹120",
+    price: "S$2.00",
     badge: "Traditional",
     color: "from-yellow-500 to-orange-600",
     icon: "🥭",
@@ -266,7 +266,7 @@ export const products: Product[] = [
   {
     id: 31,
     name: "Basmati Rice 5kg",
-    price: "₹450",
+    price: "S$7.50",
     badge: "Grains",
     color: "from-gray-100 to-gray-300",
     icon: "🍚",
@@ -274,7 +274,7 @@ export const products: Product[] = [
   {
     id: 32,
     name: "Toor Dal 1kg",
-    price: "₹140",
+    price: "S$2.30",
     badge: "Protein",
     color: "from-yellow-400 to-yellow-600",
     icon: "🫘",
@@ -282,7 +282,7 @@ export const products: Product[] = [
   {
     id: 33,
     name: "Chana Dal 1kg",
-    price: "₹120",
+    price: "S$2.00",
     badge: "Protein",
     color: "from-yellow-300 to-yellow-500",
     icon: "🫘",
@@ -290,7 +290,7 @@ export const products: Product[] = [
   {
     id: 34,
     name: "Moong Dal 1kg",
-    price: "₹130",
+    price: "S$2.10",
     badge: "Protein",
     color: "from-green-300 to-green-500",
     icon: "🫘",
@@ -298,7 +298,7 @@ export const products: Product[] = [
   {
     id: 35,
     name: "Wheat Flour 5kg",
-    price: "₹180",
+    price: "S$3.00",
     badge: "Grains",
     color: "from-amber-200 to-amber-400",
     icon: "🌾",
@@ -308,7 +308,7 @@ export const products: Product[] = [
   {
     id: 36,
     name: "Fresh Onions",
-    price: "₹30/kg",
+    price: "S$0.50/kg",
     badge: "Vegetables",
     color: "from-purple-200 to-purple-400",
     icon: "🧅",
@@ -316,7 +316,7 @@ export const products: Product[] = [
   {
     id: 37,
     name: "Ginger (Adrak)",
-    price: "₹180/kg",
+    price: "S$3.00/kg",
     badge: "Spicy",
     color: "from-yellow-400 to-yellow-600",
     icon: "🫚",
@@ -324,7 +324,7 @@ export const products: Product[] = [
   {
     id: 38,
     name: "Garlic (Lehsun)",
-    price: "₹200/kg",
+    price: "S$3.20/kg",
     badge: "Spicy",
     color: "from-gray-200 to-gray-400",
     icon: "🧄",
@@ -332,7 +332,7 @@ export const products: Product[] = [
   {
     id: 39,
     name: "Green Chili",
-    price: "₹80/kg",
+    price: "S$1.30/kg",
     badge: "Spicy",
     color: "from-green-400 to-green-600",
     icon: "🌶️",
@@ -340,7 +340,7 @@ export const products: Product[] = [
   {
     id: 40,
     name: "Fresh Tomatoes",
-    price: "₹35/kg",
+    price: "S$0.55/kg",
     badge: "Vegetables",
     color: "from-red-300 to-red-500",
     icon: "🍅",
@@ -350,7 +350,7 @@ export const products: Product[] = [
   {
     id: 41,
     name: "Sweet Oranges",
-    price: "₹60/kg",
+    price: "S$1.00/kg",
     badge: "Fruits",
     color: "from-orange-300 to-orange-500",
     icon: "🍊",
@@ -358,7 +358,7 @@ export const products: Product[] = [
   {
     id: 42,
     name: "Fresh Grapes",
-    price: "₹80/kg",
+    price: "S$1.30/kg",
     badge: "Fruits",
     color: "from-purple-300 to-purple-500",
     icon: "🍇",
@@ -366,7 +366,7 @@ export const products: Product[] = [
   {
     id: 43,
     name: "Apple (Kashmiri)",
-    price: "₹120/kg",
+    price: "S$2.00/kg",
     badge: "Fruits",
     color: "from-red-300 to-red-500",
     icon: "🍎",
@@ -374,7 +374,7 @@ export const products: Product[] = [
   {
     id: 44,
     name: "Watermelon",
-    price: "₹25/kg",
+    price: "S$0.40/kg",
     badge: "Fruits",
     color: "from-green-300 to-green-500",
     icon: "🍉",
@@ -382,7 +382,7 @@ export const products: Product[] = [
   {
     id: 45,
     name: "Sweet Lime (Mosambi)",
-    price: "₹40/kg",
+    price: "S$0.65/kg",
     badge: "Fruits",
     color: "from-green-200 to-green-400",
     icon: "🍋",
@@ -392,7 +392,7 @@ export const products: Product[] = [
   {
     id: 46,
     name: "Maggi Noodles",
-    price: "₹14",
+    price: "S$0.23",
     badge: "Ready to eat",
     color: "from-yellow-400 to-orange-500",
     icon: "🍜",
@@ -400,7 +400,7 @@ export const products: Product[] = [
   {
     id: 47,
     name: "Poha (Flattened Rice)",
-    price: "₹60/kg",
+    price: "S$1.00/kg",
     badge: "Grains",
     color: "from-gray-100 to-gray-300",
     icon: "🍚",
@@ -408,7 +408,7 @@ export const products: Product[] = [
   {
     id: 48,
     name: "Cornflakes",
-    price: "₹180",
+    price: "S$3.00",
     badge: "Ready to eat",
     color: "from-yellow-300 to-yellow-500",
     icon: "🥣",
@@ -416,7 +416,7 @@ export const products: Product[] = [
   {
     id: 49,
     name: "Chocos Cereal",
-    price: "₹220",
+    price: "S$3.60",
     badge: "Sweet",
     color: "from-amber-400 to-amber-600",
     icon: "🥣",
@@ -424,7 +424,7 @@ export const products: Product[] = [
   {
     id: 50,
     name: "Mixture Namkeen",
-    price: "₹40",
+    price: "S$0.65",
     badge: "Snacks",
     color: "from-orange-400 to-orange-600",
     icon: "🥨",
@@ -434,7 +434,7 @@ export const products: Product[] = [
   {
     id: 51,
     name: "MDH Garam Masala",
-    price: "₹45",
+    price: "S$0.75",
     badge: "Spicy",
     color: "from-red-400 to-red-600",
     icon: "🌶️",
@@ -442,7 +442,7 @@ export const products: Product[] = [
   {
     id: 52,
     name: "Turmeric Powder",
-    price: "₹120/kg",
+    price: "S$2.00/kg",
     badge: "Spicy",
     color: "from-yellow-500 to-yellow-700",
     icon: "🌿",
@@ -450,7 +450,7 @@ export const products: Product[] = [
   {
     id: 53,
     name: "Red Chili Powder",
-    price: "₹180/kg",
+    price: "S$3.00/kg",
     badge: "Spicy",
     color: "from-red-500 to-red-700",
     icon: "🌶️",
@@ -458,7 +458,7 @@ export const products: Product[] = [
   {
     id: 54,
     name: "Cumin Seeds (Jeera)",
-    price: "₹300/kg",
+    price: "S$5.00/kg",
     badge: "Spicy",
     color: "from-amber-500 to-amber-700",
     icon: "🌿",
@@ -466,7 +466,7 @@ export const products: Product[] = [
   {
     id: 55,
     name: "Coriander Seeds",
-    price: "₹200/kg",
+    price: "S$3.30/kg",
     badge: "Spicy",
     color: "from-green-400 to-green-600",
     icon: "🌿",
@@ -476,7 +476,7 @@ export const products: Product[] = [
   {
     id: 56,
     name: "Papad (Lijjat)",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Traditional",
     color: "from-yellow-300 to-yellow-500",
     icon: "🫓",
@@ -484,7 +484,7 @@ export const products: Product[] = [
   {
     id: 57,
     name: "Coconut Oil 1L",
-    price: "₹180",
+    price: "S$3.00",
     badge: "Traditional",
     color: "from-gray-100 to-gray-300",
     icon: "🥥",
@@ -492,7 +492,7 @@ export const products: Product[] = [
   {
     id: 58,
     name: "Mustard Oil 1L",
-    price: "₹140",
+    price: "S$2.30",
     badge: "Traditional",
     color: "from-yellow-500 to-yellow-700",
     icon: "🫗",
@@ -500,7 +500,7 @@ export const products: Product[] = [
   {
     id: 59,
     name: "Jaggery (Gur) 1kg",
-    price: "₹60",
+    price: "S$1.00",
     badge: "Sweet",
     color: "from-amber-500 to-amber-700",
     icon: "🍯",
@@ -508,7 +508,7 @@ export const products: Product[] = [
   {
     id: 60,
     name: "Rock Salt (Sendha)",
-    price: "₹40",
+    price: "S$0.65",
     badge: "Traditional",
     color: "from-gray-200 to-gray-400",
     icon: "🧂",
@@ -518,7 +518,7 @@ export const products: Product[] = [
   {
     id: 61,
     name: "Frooti Mango Drink",
-    price: "₹15",
+    price: "S$0.25",
     badge: "Beverages",
     color: "from-orange-300 to-orange-500",
     icon: "🧃",
@@ -526,7 +526,7 @@ export const products: Product[] = [
   {
     id: 62,
     name: "Real Fruit Juice",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Beverages",
     color: "from-purple-300 to-purple-500",
     icon: "🧃",
@@ -534,7 +534,7 @@ export const products: Product[] = [
   {
     id: 63,
     name: "Nimbu Paani Mix",
-    price: "₹25",
+    price: "S$0.40",
     badge: "Beverages",
     color: "from-green-300 to-green-500",
     icon: "🍋",
@@ -542,7 +542,7 @@ export const products: Product[] = [
   {
     id: 64,
     name: "Tata Tea Gold",
-    price: "₹180/250g",
+    price: "S$3.00/250g",
     badge: "Beverages",
     color: "from-amber-400 to-amber-600",
     icon: "🍵",
@@ -550,7 +550,7 @@ export const products: Product[] = [
   {
     id: 65,
     name: "Bournvita 500g",
-    price: "₹280",
+    price: "S$4.60",
     badge: "Beverages",
     color: "from-amber-600 to-amber-800",
     icon: "☕",
@@ -560,7 +560,7 @@ export const products: Product[] = [
   {
     id: 66,
     name: "Capsicum (Shimla Mirch)",
-    price: "₹60/kg",
+    price: "S$1.00/kg",
     badge: "Vegetables",
     color: "from-green-400 to-green-600",
     icon: "🫑",
@@ -568,7 +568,7 @@ export const products: Product[] = [
   {
     id: 67,
     name: "Cauliflower (Gobi)",
-    price: "₹40/kg",
+    price: "S$0.65/kg",
     badge: "Vegetables",
     color: "from-gray-100 to-gray-300",
     icon: "🥬",
@@ -576,15 +576,15 @@ export const products: Product[] = [
   {
     id: 68,
     name: "Cabbage (Patta Gobi)",
-    price: "₹25/kg",
+    price: "S$0.40/kg",
     badge: "Vegetables",
     color: "from-green-200 to-green-400",
-    icon: "🥬",
+    icon: "��",
   },
   {
     id: 69,
     name: "Potato (Aloo)",
-    price: "₹25/kg",
+    price: "S$0.40/kg",
     badge: "Vegetables",
     color: "from-yellow-200 to-yellow-400",
     icon: "🥔",
@@ -592,7 +592,7 @@ export const products: Product[] = [
   {
     id: 70,
     name: "Sweet Potato (Shakarkandi)",
-    price: "₹35/kg",
+    price: "S$0.55/kg",
     badge: "Vegetables",
     color: "from-orange-300 to-orange-500",
     icon: "🍠",
@@ -602,7 +602,7 @@ export const products: Product[] = [
   {
     id: 71,
     name: "Butter 100g",
-    price: "₹55",
+    price: "S$0.90",
     badge: "Dairy",
     color: "from-yellow-300 to-yellow-500",
     icon: "🧈",
@@ -610,7 +610,7 @@ export const products: Product[] = [
   {
     id: 72,
     name: "Fresh Cream 200ml",
-    price: "₹45",
+    price: "S$0.75",
     badge: "Dairy",
     color: "from-gray-100 to-gray-200",
     icon: "🥛",
@@ -618,7 +618,7 @@ export const products: Product[] = [
   {
     id: 73,
     name: "Cheese Slice",
-    price: "₹120",
+    price: "S$2.00",
     badge: "Dairy",
     color: "from-yellow-200 to-yellow-400",
     icon: "🧀",
@@ -626,7 +626,7 @@ export const products: Product[] = [
   {
     id: 74,
     name: "Buttermilk (Chaas)",
-    price: "₹20",
+    price: "S$0.33",
     badge: "Dairy",
     color: "from-blue-100 to-blue-300",
     icon: "🥛",
@@ -634,7 +634,7 @@ export const products: Product[] = [
   {
     id: 75,
     name: "Ice Cream (Kulfi)",
-    price: "₹35",
+    price: "S$0.55",
     badge: "Sweet",
     color: "from-pink-300 to-pink-500",
     icon: "🍦",
@@ -644,7 +644,7 @@ export const products: Product[] = [
   {
     id: 76,
     name: "Banana Chips",
-    price: "₹120/kg",
+    price: "S$2.00/kg",
     badge: "Snacks",
     color: "from-yellow-400 to-yellow-600",
     icon: "🍌",
@@ -652,7 +652,7 @@ export const products: Product[] = [
   {
     id: 77,
     name: "Coconut Laddu",
-    price: "₹240/kg",
+    price: "S$4.00/kg",
     badge: "Sweet",
     color: "from-gray-100 to-gray-300",
     icon: "🥥",
@@ -660,7 +660,7 @@ export const products: Product[] = [
   {
     id: 78,
     name: "Gulab Jamun Mix",
-    price: "₹45",
+    price: "S$0.75",
     badge: "Sweet",
     color: "from-amber-400 to-amber-600",
     icon: "🍯",
@@ -668,7 +668,7 @@ export const products: Product[] = [
   {
     id: 79,
     name: "Khakhras",
-    price: "₹80",
+    price: "S$1.30",
     badge: "Snacks",
     color: "from-yellow-300 to-yellow-500",
     icon: "🍪",
@@ -676,7 +676,7 @@ export const products: Product[] = [
   {
     id: 80,
     name: "Mathri",
-    price: "₹180/kg",
+    price: "S$3.00/kg",
     badge: "Snacks",
     color: "from-amber-300 to-amber-500",
     icon: "🥨",
@@ -686,7 +686,7 @@ export const products: Product[] = [
   {
     id: 81,
     name: "Black Gram (Urad Dal)",
-    price: "₹150/kg",
+    price: "S$2.50/kg",
     badge: "Protein",
     color: "from-gray-600 to-gray-800",
     icon: "🫘",
@@ -694,7 +694,7 @@ export const products: Product[] = [
   {
     id: 82,
     name: "Kidney Beans (Rajma)",
-    price: "₹160/kg",
+    price: "S$2.60/kg",
     badge: "Protein",
     color: "from-red-400 to-red-600",
     icon: "🫘",
@@ -702,7 +702,7 @@ export const products: Product[] = [
   {
     id: 83,
     name: "Chickpeas (Kabuli Chana)",
-    price: "₹120/kg",
+    price: "S$2.00/kg",
     badge: "Protein",
     color: "from-yellow-300 to-yellow-500",
     icon: "🫘",
@@ -710,7 +710,7 @@ export const products: Product[] = [
   {
     id: 84,
     name: "Black Mustard Seeds",
-    price: "₹180/kg",
+    price: "S$3.00/kg",
     badge: "Spicy",
     color: "from-gray-600 to-gray-800",
     icon: "🌿",
@@ -718,7 +718,7 @@ export const products: Product[] = [
   {
     id: 85,
     name: "Fenugreek Seeds (Methi)",
-    price: "₹220/kg",
+    price: "S$3.60/kg",
     badge: "Spicy",
     color: "from-green-500 to-green-700",
     icon: "🌿",
@@ -728,7 +728,7 @@ export const products: Product[] = [
   {
     id: 86,
     name: "Hing (Asafoetida)",
-    price: "₹800/100g",
+    price: "S$13.00/100g",
     badge: "Spicy",
     color: "from-yellow-600 to-yellow-800",
     icon: "🌿",
@@ -736,7 +736,7 @@ export const products: Product[] = [
   {
     id: 87,
     name: "Tamarind (Imli)",
-    price: "₹120/kg",
+    price: "S$2.00/kg",
     badge: "Traditional",
     color: "from-amber-600 to-amber-800",
     icon: "🫐",
@@ -744,7 +744,7 @@ export const products: Product[] = [
   {
     id: 88,
     name: "Dry Coconut (Copra)",
-    price: "₹180/kg",
+    price: "S$3.00/kg",
     badge: "Traditional",
     color: "from-gray-100 to-gray-300",
     icon: "🥥",
@@ -752,7 +752,7 @@ export const products: Product[] = [
   {
     id: 89,
     name: "Sesame Seeds (Til)",
-    price: "₹160/kg",
+    price: "S$2.60/kg",
     badge: "Traditional",
     color: "from-yellow-200 to-yellow-400",
     icon: "🌿",
@@ -760,7 +760,7 @@ export const products: Product[] = [
   {
     id: 90,
     name: "Cashew Nuts",
-    price: "₹800/kg",
+    price: "S$13.00/kg",
     badge: "Traditional",
     color: "from-yellow-100 to-yellow-300",
     icon: "🥜",
@@ -770,7 +770,7 @@ export const products: Product[] = [
   {
     id: 91,
     name: "Almonds (Badam)",
-    price: "₹900/kg",
+    price: "S$15.00/kg",
     badge: "Traditional",
     color: "from-amber-200 to-amber-400",
     icon: "🥜",
@@ -778,7 +778,7 @@ export const products: Product[] = [
   {
     id: 92,
     name: "Raisins (Kishmish)",
-    price: "₹350/kg",
+    price: "S$5.80/kg",
     badge: "Sweet",
     color: "from-purple-300 to-purple-500",
     icon: "🍇",
@@ -786,7 +786,7 @@ export const products: Product[] = [
   {
     id: 93,
     name: "Dates (Khajur)",
-    price: "₹280/kg",
+    price: "S$4.60/kg",
     badge: "Sweet",
     color: "from-amber-500 to-amber-700",
     icon: "🫐",
@@ -794,7 +794,7 @@ export const products: Product[] = [
   {
     id: 94,
     name: "Pistachios (Pista)",
-    price: "₹1200/kg",
+    price: "S$20.00/kg",
     badge: "Traditional",
     color: "from-green-300 to-green-500",
     icon: "🥜",
@@ -802,7 +802,7 @@ export const products: Product[] = [
   {
     id: 95,
     name: "Walnuts (Akhrot)",
-    price: "₹1000/kg",
+    price: "S$16.00/kg",
     badge: "Traditional",
     color: "from-amber-400 to-amber-600",
     icon: "🥜",
@@ -810,7 +810,7 @@ export const products: Product[] = [
   {
     id: 96,
     name: "Fig (Anjeer)",
-    price: "₹800/kg",
+    price: "S$13.00/kg",
     badge: "Sweet",
     color: "from-purple-400 to-purple-600",
     icon: "🫐",
@@ -818,7 +818,7 @@ export const products: Product[] = [
   {
     id: 97,
     name: "Saffron (Kesar)",
-    price: "₹25000/100g",
+    price: "S$41.00/100g",
     badge: "Traditional",
     color: "from-yellow-600 to-orange-600",
     icon: "🌿",
@@ -826,7 +826,7 @@ export const products: Product[] = [
   {
     id: 98,
     name: "Green Cardamom (Elaichi)",
-    price: "₹1800/kg",
+    price: "S$30.00/kg",
     badge: "Spicy",
     color: "from-green-400 to-green-600",
     icon: "🌿",
@@ -834,7 +834,7 @@ export const products: Product[] = [
   {
     id: 99,
     name: "Cinnamon (Dalchini)",
-    price: "₹600/kg",
+    price: "S$10.00/kg",
     badge: "Spicy",
     color: "from-amber-500 to-amber-700",
     icon: "🌿",
@@ -842,7 +842,7 @@ export const products: Product[] = [
   {
     id: 100,
     name: "Star Anise (Chakra Phool)",
-    price: "₹400/kg",
+    price: "S$6.50/kg",
     badge: "Spicy",
     color: "from-amber-600 to-amber-800",
     icon: "⭐",

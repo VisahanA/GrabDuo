@@ -46,7 +46,7 @@ function WishlistPage() {
         {
             id: 1,
             name: "Fresh Organic Bananas",
-            price: "$2.99",
+            price: "S$4.00",
             icon: "🍌",
             color: "from-yellow-400 to-yellow-600",
             badge: "Fresh",
@@ -55,7 +55,7 @@ function WishlistPage() {
         {
             id: 2,
             name: "Whole Milk",
-            price: "$3.49",
+            price: "S$4.70",
             icon: "🥛",
             color: "from-blue-400 to-blue-600",
             badge: "Dairy",
@@ -64,7 +64,7 @@ function WishlistPage() {
         {
             id: 3,
             name: "Sourdough Bread",
-            price: "$4.99",
+            price: "S$6.70",
             icon: "🍞",
             color: "from-amber-400 to-amber-600",
             badge: "Bakery",
@@ -73,7 +73,7 @@ function WishlistPage() {
         {
             id: 4,
             name: "Greek Yogurt",
-            price: "$5.99",
+            price: "S$8.00",
             icon: "🥛",
             color: "from-purple-400 to-purple-600",
             badge: "Organic",
@@ -82,7 +82,7 @@ function WishlistPage() {
         {
             id: 5,
             name: "Fresh Avocados",
-            price: "$6.99",
+            price: "S$9.40",
             icon: "🥑",
             color: "from-green-400 to-green-600",
             badge: "Premium",

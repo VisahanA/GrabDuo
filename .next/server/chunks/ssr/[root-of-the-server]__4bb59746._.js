@@ -530,7 +530,7 @@ const products = [
     {
         id: 1,
         name: "Fresh Mango (Alphonso)",
-        price: "₹80/kg",
+        price: "S$1.30/kg",
         badge: "Fruits",
         color: "from-yellow-300 to-orange-400",
         icon: "🥭"
@@ -538,7 +538,7 @@ const products = [
     {
         id: 2,
         name: "Sweet Guava",
-        price: "₹40/kg",
+        price: "S$0.65/kg",
         badge: "Fruits",
         color: "from-green-200 to-green-400",
         icon: "🍈"
@@ -546,7 +546,7 @@ const products = [
     {
         id: 3,
         name: "Fresh Pomegranate",
-        price: "₹120/kg",
+        price: "S$1.95/kg",
         badge: "Fruits",
         color: "from-red-300 to-red-500",
         icon: "🍎"
@@ -554,7 +554,7 @@ const products = [
     {
         id: 4,
         name: "Kesar Banana",
-        price: "₹60/dozen",
+        price: "S$0.95/dozen",
         badge: "Fruits",
         color: "from-yellow-200 to-yellow-400",
         icon: "🍌"
@@ -562,7 +562,7 @@ const products = [
     {
         id: 5,
         name: "Fresh Papaya",
-        price: "₹30/kg",
+        price: "S$0.50/kg",
         badge: "Fruits",
         color: "from-orange-200 to-orange-400",
         icon: "🍊"
@@ -571,7 +571,7 @@ const products = [
     {
         id: 6,
         name: "Lady Finger (Bhindi)",
-        price: "₹40/kg",
+        price: "S$0.65/kg",
         badge: "Vegetables",
         color: "from-green-300 to-green-500",
         icon: "🥒"
@@ -579,7 +579,7 @@ const products = [
     {
         id: 7,
         name: "Brinjal (Baingan)",
-        price: "₹35/kg",
+        price: "S$0.55/kg",
         badge: "Vegetables",
         color: "from-purple-300 to-purple-500",
         icon: "🍆"
@@ -587,7 +587,7 @@ const products = [
     {
         id: 8,
         name: "Bitter Gourd (Karela)",
-        price: "₹45/kg",
+        price: "S$0.75/kg",
         badge: "Vegetables",
         color: "from-green-400 to-green-600",
         icon: "🥬"
@@ -595,7 +595,7 @@ const products = [
     {
         id: 9,
         name: "Bottle Gourd (Lauki)",
-        price: "₹25/kg",
+        price: "S$0.40/kg",
         badge: "Vegetables",
         color: "from-green-200 to-green-400",
         icon: "🥒"
@@ -603,7 +603,7 @@ const products = [
     {
         id: 10,
         name: "Drumstick (Moringa)",
-        price: "₹60/kg",
+        price: "S$0.95/kg",
         badge: "Vegetables",
         color: "from-green-300 to-green-500",
         icon: "🌿"
@@ -612,7 +612,7 @@ const products = [
     {
         id: 11,
         name: "Coca Cola 600ml",
-        price: "₹40",
+        price: "S$0.65",
         badge: "Beverages",
         color: "from-red-400 to-red-600",
         icon: "🥤"
@@ -620,7 +620,7 @@ const products = [
     {
         id: 12,
         name: "Pepsi 600ml",
-        price: "₹40",
+        price: "S$0.65",
         badge: "Beverages",
         color: "from-blue-400 to-blue-600",
         icon: "🥤"
@@ -628,7 +628,7 @@ const products = [
     {
         id: 13,
         name: "Thums Up 600ml",
-        price: "₹40",
+        price: "S$0.65",
         badge: "Beverages",
         color: "from-gray-600 to-gray-800",
         icon: "🥤"
@@ -636,7 +636,7 @@ const products = [
     {
         id: 14,
         name: "Masala Chai",
-        price: "₹15/cup",
+        price: "S$0.25/cup",
         badge: "Beverages",
         color: "from-amber-300 to-amber-500",
         icon: "☕"
@@ -644,7 +644,7 @@ const products = [
     {
         id: 15,
         name: "Sweet Lassi",
-        price: "₹30",
+        price: "S$0.50",
         badge: "Dairy",
         color: "from-pink-200 to-pink-400",
         icon: "🥛"
@@ -653,7 +653,7 @@ const products = [
     {
         id: 16,
         name: "Parle-G Original",
-        price: "₹10",
+        price: "S$0.15",
         badge: "Biscuits",
         color: "from-yellow-200 to-yellow-400",
         icon: "🍪"
@@ -661,7 +661,7 @@ const products = [
     {
         id: 17,
         name: "Monaco Salted Biscuits",
-        price: "₹15",
+        price: "S$0.25",
         badge: "Biscuits",
         color: "from-orange-200 to-orange-400",
         icon: "🍪"
@@ -669,7 +669,7 @@ const products = [
     {
         id: 18,
         name: "Good Day Cashew",
-        price: "₹25",
+        price: "S$0.40",
         badge: "Biscuits",
         color: "from-amber-200 to-amber-400",
         icon: "🍪"
@@ -677,7 +677,7 @@ const products = [
     {
         id: 19,
         name: "Oreo Cookies",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Biscuits",
         color: "from-gray-600 to-gray-800",
         icon: "🍪"
@@ -685,7 +685,7 @@ const products = [
     {
         id: 20,
         name: "Marie Gold Biscuits",
-        price: "₹30",
+        price: "S$0.50",
         badge: "Biscuits",
         color: "from-yellow-300 to-yellow-500",
         icon: "🍪"
@@ -694,7 +694,7 @@ const products = [
     {
         id: 21,
         name: "Haldiram's Namkeen",
-        price: "₹45",
+        price: "S$0.75",
         badge: "Snacks",
         color: "from-yellow-400 to-orange-500",
         icon: "🥨"
@@ -702,7 +702,7 @@ const products = [
     {
         id: 22,
         name: "Kurkure Masala Munch",
-        price: "₹20",
+        price: "S$0.35",
         badge: "Snacks",
         color: "from-orange-400 to-red-500",
         icon: "🌽"
@@ -710,7 +710,7 @@ const products = [
     {
         id: 23,
         name: "Lay's Classic Salted",
-        price: "₹20",
+        price: "S$0.35",
         badge: "Snacks",
         color: "from-yellow-300 to-yellow-500",
         icon: "🥔"
@@ -718,7 +718,7 @@ const products = [
     {
         id: 24,
         name: "Samosa (Frozen)",
-        price: "₹80/pack",
+        price: "S$1.30/pack",
         badge: "Ready to eat",
         color: "from-amber-300 to-amber-500",
         icon: "🥟"
@@ -726,7 +726,7 @@ const products = [
     {
         id: 25,
         name: "Bhujia Sev",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Snacks",
         color: "from-yellow-500 to-orange-600",
         icon: "🍜"
@@ -735,7 +735,7 @@ const products = [
     {
         id: 26,
         name: "Pure Desi Ghee",
-        price: "₹580/kg",
+        price: "S$9.50/kg",
         badge: "Traditional",
         color: "from-yellow-400 to-yellow-600",
         icon: "🧈"
@@ -743,7 +743,7 @@ const products = [
     {
         id: 27,
         name: "Fresh Paneer",
-        price: "₹320/kg",
+        price: "S$5.20/kg",
         badge: "Dairy",
         color: "from-gray-100 to-gray-300",
         icon: "🧀"
@@ -751,15 +751,15 @@ const products = [
     {
         id: 28,
         name: "Amul Milk 1L",
-        price: "₹62",
+        price: "S$1.00",
         badge: "Dairy",
         color: "from-blue-200 to-blue-400",
-        icon: "🥛"
+        icon: "��"
     },
     {
         id: 29,
         name: "Curd (Dahi) 500g",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Dairy",
         color: "from-gray-100 to-gray-200",
         icon: "🥛"
@@ -767,7 +767,7 @@ const products = [
     {
         id: 30,
         name: "Mango Pickle",
-        price: "₹120",
+        price: "S$2.00",
         badge: "Traditional",
         color: "from-yellow-500 to-orange-600",
         icon: "🥭"
@@ -776,7 +776,7 @@ const products = [
     {
         id: 31,
         name: "Basmati Rice 5kg",
-        price: "₹450",
+        price: "S$7.50",
         badge: "Grains",
         color: "from-gray-100 to-gray-300",
         icon: "🍚"
@@ -784,7 +784,7 @@ const products = [
     {
         id: 32,
         name: "Toor Dal 1kg",
-        price: "₹140",
+        price: "S$2.30",
         badge: "Protein",
         color: "from-yellow-400 to-yellow-600",
         icon: "🫘"
@@ -792,7 +792,7 @@ const products = [
     {
         id: 33,
         name: "Chana Dal 1kg",
-        price: "₹120",
+        price: "S$2.00",
         badge: "Protein",
         color: "from-yellow-300 to-yellow-500",
         icon: "🫘"
@@ -800,7 +800,7 @@ const products = [
     {
         id: 34,
         name: "Moong Dal 1kg",
-        price: "₹130",
+        price: "S$2.10",
         badge: "Protein",
         color: "from-green-300 to-green-500",
         icon: "🫘"
@@ -808,7 +808,7 @@ const products = [
     {
         id: 35,
         name: "Wheat Flour 5kg",
-        price: "₹180",
+        price: "S$3.00",
         badge: "Grains",
         color: "from-amber-200 to-amber-400",
         icon: "🌾"
@@ -817,7 +817,7 @@ const products = [
     {
         id: 36,
         name: "Fresh Onions",
-        price: "₹30/kg",
+        price: "S$0.50/kg",
         badge: "Vegetables",
         color: "from-purple-200 to-purple-400",
         icon: "🧅"
@@ -825,7 +825,7 @@ const products = [
     {
         id: 37,
         name: "Ginger (Adrak)",
-        price: "₹180/kg",
+        price: "S$3.00/kg",
         badge: "Spicy",
         color: "from-yellow-400 to-yellow-600",
         icon: "🫚"
@@ -833,7 +833,7 @@ const products = [
     {
         id: 38,
         name: "Garlic (Lehsun)",
-        price: "₹200/kg",
+        price: "S$3.20/kg",
         badge: "Spicy",
         color: "from-gray-200 to-gray-400",
         icon: "🧄"
@@ -841,7 +841,7 @@ const products = [
     {
         id: 39,
         name: "Green Chili",
-        price: "₹80/kg",
+        price: "S$1.30/kg",
         badge: "Spicy",
         color: "from-green-400 to-green-600",
         icon: "🌶️"
@@ -849,7 +849,7 @@ const products = [
     {
         id: 40,
         name: "Fresh Tomatoes",
-        price: "₹35/kg",
+        price: "S$0.55/kg",
         badge: "Vegetables",
         color: "from-red-300 to-red-500",
         icon: "🍅"
@@ -858,7 +858,7 @@ const products = [
     {
         id: 41,
         name: "Sweet Oranges",
-        price: "₹60/kg",
+        price: "S$1.00/kg",
         badge: "Fruits",
         color: "from-orange-300 to-orange-500",
         icon: "🍊"
@@ -866,7 +866,7 @@ const products = [
     {
         id: 42,
         name: "Fresh Grapes",
-        price: "₹80/kg",
+        price: "S$1.30/kg",
         badge: "Fruits",
         color: "from-purple-300 to-purple-500",
         icon: "🍇"
@@ -874,7 +874,7 @@ const products = [
     {
         id: 43,
         name: "Apple (Kashmiri)",
-        price: "₹120/kg",
+        price: "S$2.00/kg",
         badge: "Fruits",
         color: "from-red-300 to-red-500",
         icon: "🍎"
@@ -882,7 +882,7 @@ const products = [
     {
         id: 44,
         name: "Watermelon",
-        price: "₹25/kg",
+        price: "S$0.40/kg",
         badge: "Fruits",
         color: "from-green-300 to-green-500",
         icon: "🍉"
@@ -890,7 +890,7 @@ const products = [
     {
         id: 45,
         name: "Sweet Lime (Mosambi)",
-        price: "₹40/kg",
+        price: "S$0.65/kg",
         badge: "Fruits",
         color: "from-green-200 to-green-400",
         icon: "🍋"
@@ -899,7 +899,7 @@ const products = [
     {
         id: 46,
         name: "Maggi Noodles",
-        price: "₹14",
+        price: "S$0.23",
         badge: "Ready to eat",
         color: "from-yellow-400 to-orange-500",
         icon: "🍜"
@@ -907,7 +907,7 @@ const products = [
     {
         id: 47,
         name: "Poha (Flattened Rice)",
-        price: "₹60/kg",
+        price: "S$1.00/kg",
         badge: "Grains",
         color: "from-gray-100 to-gray-300",
         icon: "🍚"
@@ -915,7 +915,7 @@ const products = [
     {
         id: 48,
         name: "Cornflakes",
-        price: "₹180",
+        price: "S$3.00",
         badge: "Ready to eat",
         color: "from-yellow-300 to-yellow-500",
         icon: "🥣"
@@ -923,7 +923,7 @@ const products = [
     {
         id: 49,
         name: "Chocos Cereal",
-        price: "₹220",
+        price: "S$3.60",
         badge: "Sweet",
         color: "from-amber-400 to-amber-600",
         icon: "🥣"
@@ -931,7 +931,7 @@ const products = [
     {
         id: 50,
         name: "Mixture Namkeen",
-        price: "₹40",
+        price: "S$0.65",
         badge: "Snacks",
         color: "from-orange-400 to-orange-600",
         icon: "🥨"
@@ -940,7 +940,7 @@ const products = [
     {
         id: 51,
         name: "MDH Garam Masala",
-        price: "₹45",
+        price: "S$0.75",
         badge: "Spicy",
         color: "from-red-400 to-red-600",
         icon: "🌶️"
@@ -948,7 +948,7 @@ const products = [
     {
         id: 52,
         name: "Turmeric Powder",
-        price: "₹120/kg",
+        price: "S$2.00/kg",
         badge: "Spicy",
         color: "from-yellow-500 to-yellow-700",
         icon: "🌿"
@@ -956,7 +956,7 @@ const products = [
     {
         id: 53,
         name: "Red Chili Powder",
-        price: "₹180/kg",
+        price: "S$3.00/kg",
         badge: "Spicy",
         color: "from-red-500 to-red-700",
         icon: "🌶️"
@@ -964,7 +964,7 @@ const products = [
     {
         id: 54,
         name: "Cumin Seeds (Jeera)",
-        price: "₹300/kg",
+        price: "S$5.00/kg",
         badge: "Spicy",
         color: "from-amber-500 to-amber-700",
         icon: "🌿"
@@ -972,7 +972,7 @@ const products = [
     {
         id: 55,
         name: "Coriander Seeds",
-        price: "₹200/kg",
+        price: "S$3.30/kg",
         badge: "Spicy",
         color: "from-green-400 to-green-600",
         icon: "🌿"
@@ -981,7 +981,7 @@ const products = [
     {
         id: 56,
         name: "Papad (Lijjat)",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Traditional",
         color: "from-yellow-300 to-yellow-500",
         icon: "🫓"
@@ -989,7 +989,7 @@ const products = [
     {
         id: 57,
         name: "Coconut Oil 1L",
-        price: "₹180",
+        price: "S$3.00",
         badge: "Traditional",
         color: "from-gray-100 to-gray-300",
         icon: "🥥"
@@ -997,7 +997,7 @@ const products = [
     {
         id: 58,
         name: "Mustard Oil 1L",
-        price: "₹140",
+        price: "S$2.30",
         badge: "Traditional",
         color: "from-yellow-500 to-yellow-700",
         icon: "🫗"
@@ -1005,7 +1005,7 @@ const products = [
     {
         id: 59,
         name: "Jaggery (Gur) 1kg",
-        price: "₹60",
+        price: "S$1.00",
         badge: "Sweet",
         color: "from-amber-500 to-amber-700",
         icon: "🍯"
@@ -1013,7 +1013,7 @@ const products = [
     {
         id: 60,
         name: "Rock Salt (Sendha)",
-        price: "₹40",
+        price: "S$0.65",
         badge: "Traditional",
         color: "from-gray-200 to-gray-400",
         icon: "🧂"
@@ -1022,7 +1022,7 @@ const products = [
     {
         id: 61,
         name: "Frooti Mango Drink",
-        price: "₹15",
+        price: "S$0.25",
         badge: "Beverages",
         color: "from-orange-300 to-orange-500",
         icon: "🧃"
@@ -1030,7 +1030,7 @@ const products = [
     {
         id: 62,
         name: "Real Fruit Juice",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Beverages",
         color: "from-purple-300 to-purple-500",
         icon: "🧃"
@@ -1038,7 +1038,7 @@ const products = [
     {
         id: 63,
         name: "Nimbu Paani Mix",
-        price: "₹25",
+        price: "S$0.40",
         badge: "Beverages",
         color: "from-green-300 to-green-500",
         icon: "🍋"
@@ -1046,7 +1046,7 @@ const products = [
     {
         id: 64,
         name: "Tata Tea Gold",
-        price: "₹180/250g",
+        price: "S$3.00/250g",
         badge: "Beverages",
         color: "from-amber-400 to-amber-600",
         icon: "🍵"
@@ -1054,7 +1054,7 @@ const products = [
     {
         id: 65,
         name: "Bournvita 500g",
-        price: "₹280",
+        price: "S$4.60",
         badge: "Beverages",
         color: "from-amber-600 to-amber-800",
         icon: "☕"
@@ -1063,7 +1063,7 @@ const products = [
     {
         id: 66,
         name: "Capsicum (Shimla Mirch)",
-        price: "₹60/kg",
+        price: "S$1.00/kg",
         badge: "Vegetables",
         color: "from-green-400 to-green-600",
         icon: "🫑"
@@ -1071,7 +1071,7 @@ const products = [
     {
         id: 67,
         name: "Cauliflower (Gobi)",
-        price: "₹40/kg",
+        price: "S$0.65/kg",
         badge: "Vegetables",
         color: "from-gray-100 to-gray-300",
         icon: "🥬"
@@ -1079,15 +1079,15 @@ const products = [
     {
         id: 68,
         name: "Cabbage (Patta Gobi)",
-        price: "₹25/kg",
+        price: "S$0.40/kg",
         badge: "Vegetables",
         color: "from-green-200 to-green-400",
-        icon: "🥬"
+        icon: "��"
     },
     {
         id: 69,
         name: "Potato (Aloo)",
-        price: "₹25/kg",
+        price: "S$0.40/kg",
         badge: "Vegetables",
         color: "from-yellow-200 to-yellow-400",
         icon: "🥔"
@@ -1095,7 +1095,7 @@ const products = [
     {
         id: 70,
         name: "Sweet Potato (Shakarkandi)",
-        price: "₹35/kg",
+        price: "S$0.55/kg",
         badge: "Vegetables",
         color: "from-orange-300 to-orange-500",
         icon: "🍠"
@@ -1104,7 +1104,7 @@ const products = [
     {
         id: 71,
         name: "Butter 100g",
-        price: "₹55",
+        price: "S$0.90",
         badge: "Dairy",
         color: "from-yellow-300 to-yellow-500",
         icon: "🧈"
@@ -1112,7 +1112,7 @@ const products = [
     {
         id: 72,
         name: "Fresh Cream 200ml",
-        price: "₹45",
+        price: "S$0.75",
         badge: "Dairy",
         color: "from-gray-100 to-gray-200",
         icon: "🥛"
@@ -1120,7 +1120,7 @@ const products = [
     {
         id: 73,
         name: "Cheese Slice",
-        price: "₹120",
+        price: "S$2.00",
         badge: "Dairy",
         color: "from-yellow-200 to-yellow-400",
         icon: "🧀"
@@ -1128,7 +1128,7 @@ const products = [
     {
         id: 74,
         name: "Buttermilk (Chaas)",
-        price: "₹20",
+        price: "S$0.33",
         badge: "Dairy",
         color: "from-blue-100 to-blue-300",
         icon: "🥛"
@@ -1136,7 +1136,7 @@ const products = [
     {
         id: 75,
         name: "Ice Cream (Kulfi)",
-        price: "₹35",
+        price: "S$0.55",
         badge: "Sweet",
         color: "from-pink-300 to-pink-500",
         icon: "🍦"
@@ -1145,7 +1145,7 @@ const products = [
     {
         id: 76,
         name: "Banana Chips",
-        price: "₹120/kg",
+        price: "S$2.00/kg",
         badge: "Snacks",
         color: "from-yellow-400 to-yellow-600",
         icon: "🍌"
@@ -1153,7 +1153,7 @@ const products = [
     {
         id: 77,
         name: "Coconut Laddu",
-        price: "₹240/kg",
+        price: "S$4.00/kg",
         badge: "Sweet",
         color: "from-gray-100 to-gray-300",
         icon: "🥥"
@@ -1161,7 +1161,7 @@ const products = [
     {
         id: 78,
         name: "Gulab Jamun Mix",
-        price: "₹45",
+        price: "S$0.75",
         badge: "Sweet",
         color: "from-amber-400 to-amber-600",
         icon: "🍯"
@@ -1169,7 +1169,7 @@ const products = [
     {
         id: 79,
         name: "Khakhras",
-        price: "₹80",
+        price: "S$1.30",
         badge: "Snacks",
         color: "from-yellow-300 to-yellow-500",
         icon: "🍪"
@@ -1177,7 +1177,7 @@ const products = [
     {
         id: 80,
         name: "Mathri",
-        price: "₹180/kg",
+        price: "S$3.00/kg",
         badge: "Snacks",
         color: "from-amber-300 to-amber-500",
         icon: "🥨"
@@ -1186,7 +1186,7 @@ const products = [
     {
         id: 81,
         name: "Black Gram (Urad Dal)",
-        price: "₹150/kg",
+        price: "S$2.50/kg",
         badge: "Protein",
         color: "from-gray-600 to-gray-800",
         icon: "🫘"
@@ -1194,7 +1194,7 @@ const products = [
     {
         id: 82,
         name: "Kidney Beans (Rajma)",
-        price: "₹160/kg",
+        price: "S$2.60/kg",
         badge: "Protein",
         color: "from-red-400 to-red-600",
         icon: "🫘"
@@ -1202,7 +1202,7 @@ const products = [
     {
         id: 83,
         name: "Chickpeas (Kabuli Chana)",
-        price: "₹120/kg",
+        price: "S$2.00/kg",
         badge: "Protein",
         color: "from-yellow-300 to-yellow-500",
         icon: "🫘"
@@ -1210,7 +1210,7 @@ const products = [
     {
         id: 84,
         name: "Black Mustard Seeds",
-        price: "₹180/kg",
+        price: "S$3.00/kg",
         badge: "Spicy",
         color: "from-gray-600 to-gray-800",
         icon: "🌿"
@@ -1218,7 +1218,7 @@ const products = [
     {
         id: 85,
         name: "Fenugreek Seeds (Methi)",
-        price: "₹220/kg",
+        price: "S$3.60/kg",
         badge: "Spicy",
         color: "from-green-500 to-green-700",
         icon: "🌿"
@@ -1227,7 +1227,7 @@ const products = [
     {
         id: 86,
         name: "Hing (Asafoetida)",
-        price: "₹800/100g",
+        price: "S$13.00/100g",
         badge: "Spicy",
         color: "from-yellow-600 to-yellow-800",
         icon: "🌿"
@@ -1235,7 +1235,7 @@ const products = [
     {
         id: 87,
         name: "Tamarind (Imli)",
-        price: "₹120/kg",
+        price: "S$2.00/kg",
         badge: "Traditional",
         color: "from-amber-600 to-amber-800",
         icon: "🫐"
@@ -1243,7 +1243,7 @@ const products = [
     {
         id: 88,
         name: "Dry Coconut (Copra)",
-        price: "₹180/kg",
+        price: "S$3.00/kg",
         badge: "Traditional",
         color: "from-gray-100 to-gray-300",
         icon: "🥥"
@@ -1251,7 +1251,7 @@ const products = [
     {
         id: 89,
         name: "Sesame Seeds (Til)",
-        price: "₹160/kg",
+        price: "S$2.60/kg",
         badge: "Traditional",
         color: "from-yellow-200 to-yellow-400",
         icon: "🌿"
@@ -1259,7 +1259,7 @@ const products = [
     {
         id: 90,
         name: "Cashew Nuts",
-        price: "₹800/kg",
+        price: "S$13.00/kg",
         badge: "Traditional",
         color: "from-yellow-100 to-yellow-300",
         icon: "🥜"
@@ -1268,7 +1268,7 @@ const products = [
     {
         id: 91,
         name: "Almonds (Badam)",
-        price: "₹900/kg",
+        price: "S$15.00/kg",
         badge: "Traditional",
         color: "from-amber-200 to-amber-400",
         icon: "🥜"
@@ -1276,7 +1276,7 @@ const products = [
     {
         id: 92,
         name: "Raisins (Kishmish)",
-        price: "₹350/kg",
+        price: "S$5.80/kg",
         badge: "Sweet",
         color: "from-purple-300 to-purple-500",
         icon: "🍇"
@@ -1284,7 +1284,7 @@ const products = [
     {
         id: 93,
         name: "Dates (Khajur)",
-        price: "₹280/kg",
+        price: "S$4.60/kg",
         badge: "Sweet",
         color: "from-amber-500 to-amber-700",
         icon: "🫐"
@@ -1292,7 +1292,7 @@ const products = [
     {
         id: 94,
         name: "Pistachios (Pista)",
-        price: "₹1200/kg",
+        price: "S$20.00/kg",
         badge: "Traditional",
         color: "from-green-300 to-green-500",
         icon: "🥜"
@@ -1300,7 +1300,7 @@ const products = [
     {
         id: 95,
         name: "Walnuts (Akhrot)",
-        price: "₹1000/kg",
+        price: "S$16.00/kg",
         badge: "Traditional",
         color: "from-amber-400 to-amber-600",
         icon: "🥜"
@@ -1308,7 +1308,7 @@ const products = [
     {
         id: 96,
         name: "Fig (Anjeer)",
-        price: "₹800/kg",
+        price: "S$13.00/kg",
         badge: "Sweet",
         color: "from-purple-400 to-purple-600",
         icon: "🫐"
@@ -1316,7 +1316,7 @@ const products = [
     {
         id: 97,
         name: "Saffron (Kesar)",
-        price: "₹25000/100g",
+        price: "S$41.00/100g",
         badge: "Traditional",
         color: "from-yellow-600 to-orange-600",
         icon: "🌿"
@@ -1324,7 +1324,7 @@ const products = [
     {
         id: 98,
         name: "Green Cardamom (Elaichi)",
-        price: "₹1800/kg",
+        price: "S$30.00/kg",
         badge: "Spicy",
         color: "from-green-400 to-green-600",
         icon: "🌿"
@@ -1332,7 +1332,7 @@ const products = [
     {
         id: 99,
         name: "Cinnamon (Dalchini)",
-        price: "₹600/kg",
+        price: "S$10.00/kg",
         badge: "Spicy",
         color: "from-amber-500 to-amber-700",
         icon: "🌿"
@@ -1340,7 +1340,7 @@ const products = [
     {
         id: 100,
         name: "Star Anise (Chakra Phool)",
-        price: "₹400/kg",
+        price: "S$6.50/kg",
         badge: "Spicy",
         color: "from-amber-600 to-amber-800",
         icon: "⭐"
@@ -1373,6 +1373,48 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts
 function GroceryPage() {
     const { addItem, totalItems, items, updateQuantity, removeItem } = (0, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$cart$2f$CartContext$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useCart"])();
     const [isCartOpen, setIsCartOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [currentPage, setCurrentPage] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useState"])(1);
+    const itemsPerPage = 15;
+    // Calculate pagination
+    const totalPages = Math.ceil(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentProducts = __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].slice(startIndex, endIndex);
+    // Generate page numbers for pagination
+    const pageNumbers = (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["useMemo"])(()=>{
+        const pages = [];
+        const maxVisiblePages = 5;
+        if (totalPages <= maxVisiblePages) {
+            for(let i = 1; i <= totalPages; i++){
+                pages.push(i);
+            }
+        } else {
+            if (currentPage <= 3) {
+                for(let i = 1; i <= 5; i++){
+                    pages.push(i);
+                }
+            } else if (currentPage >= totalPages - 2) {
+                for(let i = totalPages - 4; i <= totalPages; i++){
+                    pages.push(i);
+                }
+            } else {
+                for(let i = currentPage - 2; i <= currentPage + 2; i++){
+                    pages.push(i);
+                }
+            }
+        }
+        return pages;
+    }, [
+        currentPage,
+        totalPages
+    ]);
+    const handlePageChange = (page)=>{
+        setCurrentPage(page);
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    };
     const handleAddToCart = (product)=>{
         addItem(product);
     };
@@ -1414,12 +1456,12 @@ function GroceryPage() {
                                             children: "GrabMart"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 48,
+                                            lineNumber: 88,
                                             columnNumber: 15
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 47,
+                                        lineNumber: 87,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1441,12 +1483,12 @@ function GroceryPage() {
                                                             d: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/page.tsx",
-                                                            lineNumber: 64,
+                                                            lineNumber: 104,
                                                             columnNumber: 19
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 58,
+                                                        lineNumber: 98,
                                                         columnNumber: 17
                                                     }, this),
                                                     totalItems > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1454,13 +1496,13 @@ function GroceryPage() {
                                                         children: totalItems
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 72,
+                                                        lineNumber: 112,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 54,
+                                                lineNumber: 94,
                                                 columnNumber: 15
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1478,29 +1520,29 @@ function GroceryPage() {
                                                         d: "M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 89,
+                                                        lineNumber: 129,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 83,
+                                                    lineNumber: 123,
                                                     columnNumber: 17
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 79,
+                                                lineNumber: 119,
                                                 columnNumber: 15
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 52,
+                                        lineNumber: 92,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 46,
+                                lineNumber: 86,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1508,7 +1550,7 @@ function GroceryPage() {
                                 children: "Fresh groceries delivered to your door"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 99,
+                                lineNumber: 139,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1528,12 +1570,12 @@ function GroceryPage() {
                                                 d: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 112,
+                                                lineNumber: 152,
                                                 columnNumber: 17
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 106,
+                                            lineNumber: 146,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -1542,7 +1584,7 @@ function GroceryPage() {
                                             className: "w-full pl-10 pr-20 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 119,
+                                            lineNumber: 159,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1564,17 +1606,17 @@ function GroceryPage() {
                                                             d: "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                                                         }, void 0, false, {
                                                             fileName: "[project]/src/app/page.tsx",
-                                                            lineNumber: 139,
+                                                            lineNumber: 179,
                                                             columnNumber: 21
                                                         }, this)
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 133,
+                                                        lineNumber: 173,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 128,
+                                                    lineNumber: 168,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1588,60 +1630,98 @@ function GroceryPage() {
                                                                 d: "M12 0l3.09 6.91L22 10l-6.91 3.09L12 20l-3.09-6.91L2 10l6.91-3.09L12 0z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 159,
+                                                                lineNumber: 199,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                                                 d: "M19 1l1.5 3.5L24 6l-3.5 1.5L19 11l-1.5-3.5L14 6l3.5-1.5L19 1z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 160,
+                                                                lineNumber: 200,
                                                                 columnNumber: 21
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
                                                                 d: "M7 4l1 2L10 7l-2 1L7 10l-1-2L4 7l2-1L7 4z"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/page.tsx",
-                                                                lineNumber: 161,
+                                                                lineNumber: 201,
                                                                 columnNumber: 21
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/page.tsx",
-                                                        lineNumber: 154,
+                                                        lineNumber: 194,
                                                         columnNumber: 19
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 153,
+                                                    lineNumber: 193,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/page.tsx",
-                                            lineNumber: 126,
+                                            lineNumber: 166,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/page.tsx",
-                                    lineNumber: 105,
+                                    lineNumber: 145,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 104,
+                                lineNumber: 144,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 45,
+                        lineNumber: 85,
+                        columnNumber: 9
+                    }, this),
+                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "flex justify-between items-center mb-4",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-gray-600",
+                                children: [
+                                    "Showing ",
+                                    startIndex + 1,
+                                    "-",
+                                    Math.min(endIndex, __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].length),
+                                    " of ",
+                                    __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].length,
+                                    " products"
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 211,
+                                columnNumber: 11
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                                className: "text-sm text-gray-500",
+                                children: [
+                                    "Page ",
+                                    currentPage,
+                                    " of ",
+                                    totalPages
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 214,
+                                columnNumber: 11
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.tsx",
+                        lineNumber: 210,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "grid grid-cols-2 gap-3",
-                        children: __TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$products$2e$ts__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["products"].map((product)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        children: currentProducts.map((product)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                                 className: "bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200",
                                 children: [
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1652,7 +1732,7 @@ function GroceryPage() {
                                                 children: product.icon
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 181,
+                                                lineNumber: 231,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1662,18 +1742,18 @@ function GroceryPage() {
                                                     children: product.badge
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 187,
+                                                    lineNumber: 237,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 186,
+                                                lineNumber: 236,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 177,
+                                        lineNumber: 227,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1684,7 +1764,7 @@ function GroceryPage() {
                                                 children: product.name
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 200,
+                                                lineNumber: 250,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1694,12 +1774,12 @@ function GroceryPage() {
                                                     children: product.price
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/page.tsx",
-                                                    lineNumber: 206,
+                                                    lineNumber: 256,
                                                     columnNumber: 19
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 205,
+                                                lineNumber: 255,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1708,30 +1788,128 @@ function GroceryPage() {
                                                 children: "Add to Cart"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/page.tsx",
-                                                lineNumber: 212,
+                                                lineNumber: 262,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/src/app/page.tsx",
-                                        lineNumber: 198,
+                                        lineNumber: 248,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, product.id, true, {
                                 fileName: "[project]/src/app/page.tsx",
-                                lineNumber: 172,
+                                lineNumber: 222,
                                 columnNumber: 13
                             }, this))
                     }, void 0, false, {
                         fileName: "[project]/src/app/page.tsx",
-                        lineNumber: 170,
+                        lineNumber: 220,
                         columnNumber: 9
+                    }, this),
+                    totalPages > 1 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                        className: "mt-8 flex flex-col items-center gap-4",
+                        children: [
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "text-sm text-gray-600",
+                                children: [
+                                    "Page ",
+                                    currentPage,
+                                    " of ",
+                                    totalPages
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 277,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                className: "flex items-center gap-2",
+                                children: [
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>handlePageChange(currentPage - 1),
+                                        disabled: currentPage === 1,
+                                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`,
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            className: "w-4 h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                strokeLinecap: "round",
+                                                strokeLinejoin: "round",
+                                                strokeWidth: 2,
+                                                d: "M15 19l-7-7 7-7"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/page.tsx",
+                                                lineNumber: 294,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/app/page.tsx",
+                                            lineNumber: 293,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/page.tsx",
+                                        lineNumber: 284,
+                                        columnNumber: 15
+                                    }, this),
+                                    pageNumbers.map((page)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                            onClick: ()=>handlePageChange(page),
+                                            className: `px-3 py-2 rounded-lg font-medium transition-colors ${currentPage === page ? 'bg-green-600 text-white shadow-sm' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`,
+                                            children: page
+                                        }, page, false, {
+                                            fileName: "[project]/src/app/page.tsx",
+                                            lineNumber: 300,
+                                            columnNumber: 17
+                                        }, this)),
+                                    /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
+                                        onClick: ()=>handlePageChange(currentPage + 1),
+                                        disabled: currentPage === totalPages,
+                                        className: `px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`,
+                                        children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("svg", {
+                                            className: "w-4 h-4",
+                                            fill: "none",
+                                            stroke: "currentColor",
+                                            viewBox: "0 0 24 24",
+                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
+                                                strokeLinecap: "round",
+                                                strokeLinejoin: "round",
+                                                strokeWidth: 2,
+                                                d: "M9 5l7 7-7 7"
+                                            }, void 0, false, {
+                                                fileName: "[project]/src/app/page.tsx",
+                                                lineNumber: 324,
+                                                columnNumber: 19
+                                            }, this)
+                                        }, void 0, false, {
+                                            fileName: "[project]/src/app/page.tsx",
+                                            lineNumber: 323,
+                                            columnNumber: 17
+                                        }, this)
+                                    }, void 0, false, {
+                                        fileName: "[project]/src/app/page.tsx",
+                                        lineNumber: 314,
+                                        columnNumber: 15
+                                    }, this)
+                                ]
+                            }, void 0, true, {
+                                fileName: "[project]/src/app/page.tsx",
+                                lineNumber: 282,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "[project]/src/app/page.tsx",
+                        lineNumber: 275,
+                        columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 43,
+                lineNumber: 83,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$src$2f$app$2f$cart$2f$CartModal$2e$tsx__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1739,7 +1917,7 @@ function GroceryPage() {
                 onClose: ()=>setIsCartOpen(false)
             }, void 0, false, {
                 fileName: "[project]/src/app/page.tsx",
-                lineNumber: 225,
+                lineNumber: 335,
                 columnNumber: 7
             }, this)
         ]
