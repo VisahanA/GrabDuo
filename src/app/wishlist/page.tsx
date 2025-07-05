@@ -1,274 +1,145 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { products } from "../products";
 import { getBadgeStyles } from "../badge";
+import { useCart } from "../cart/CartContext";
 
 export default function WishlistPage() {
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [showToast, setShowToast] = useState<string>("");
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  // Track manually added items vs default items
-  const [manuallyAddedItems, setManuallyAddedItems] = useState<any[]>([]);
-  const [hasManualAdditions, setHasManualAdditions] = useState(false);
-  
-  // Helper function to remove duplicates from wishlist
-  const removeDuplicatesFromWishlist = (items: any[]) => {
-    return items.filter((item, index, self) => 
-      index === self.findIndex(product => product.id === item.id)
-    );
+  const [newItemInput, setNewItemInput] = useState("");
+  const [shoppingList, setShoppingList] = useState<string[]>([]);
+  const [isCurateMode, setIsCurateMode] = useState(false);
+  const [curatedProducts, setCuratedProducts] = useState<any[]>([]);
+  const [toast, setToast] = useState<string>("");
+  const { addItem, removeItem, updateQuantity, items } = useCart();
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNewItemInput(e.target.value);
   };
-  
-  // Get default items (first 5 products)
-  const defaultItems = products.slice(0, 5);
-  
-  // Current wishlist: show manually added items if any, otherwise show default items
-  const currentWishlist = hasManualAdditions ? manuallyAddedItems : defaultItems;
 
-  // All products available for search
-  const allProducts = products;
-
-  // Filter products based on search query (search across ALL products)
-  const filteredSearchResults = useMemo(() => {
-    let results;
-    
-    if (!searchQuery.trim()) {
-      // When no search query
-      if (selectedItems.length > 0) {
-        // Show only selected items from current wishlist
-        results = currentWishlist.filter(item => selectedItems.includes(item.id));
-      } else {
-        // Show current wishlist (manual additions or defaults)
-        results = currentWishlist;
-      }
-    } else {
-      // When searching, search across ALL products
-      const query = searchQuery.toLowerCase();
-      results = allProducts.filter(product => 
-        product.name.toLowerCase().includes(query) ||
-        product.badge.toLowerCase().includes(query)
-      );
+  const handleAddItem = () => {
+    if (newItemInput.trim()) {
+      setShoppingList(prev => [...prev, newItemInput.trim()]);
+      setNewItemInput("");
     }
-    
-    // Remove duplicates based on product ID (safety net)
-    const uniqueResults = results.filter((item, index, self) => 
-      index === self.findIndex(product => product.id === item.id)
-    );
-    
-    // Sort selected items to the top (only relevant when searching)
-    if (searchQuery.trim()) {
-      return uniqueResults.sort((a, b) => {
-        const aSelected = selectedItems.includes(a.id);
-        const bSelected = selectedItems.includes(b.id);
-        
-        if (aSelected && !bSelected) return -1; // a comes first
-        if (!aSelected && bSelected) return 1;  // b comes first
-        return 0; // maintain original order for items with same selection status
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleAddItem();
+    }
+  };
+
+  const handleRemoveItem = (index: number) => {
+    setShoppingList(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleClearInput = () => {
+    setNewItemInput("");
+  };
+
+  const showToast = (message: string) => {
+    setToast(message);
+    setTimeout(() => setToast(""), 3000);
+  };
+
+  const handleCurateShoppingList = () => {
+    if (shoppingList.length === 0) {
+      showToast("Please add items to your shopping list first!");
+      return;
+    }
+
+    // Match shopping list items with products
+    const matchedProducts = products.filter(product => {
+      return shoppingList.some(item => {
+        // Check if any shopping list item matches product name (case insensitive)
+        return product.name.toLowerCase().includes(item.toLowerCase()) ||
+               item.toLowerCase().includes(product.name.toLowerCase().split(' ')[0]) ||
+               product.badge.toLowerCase().includes(item.toLowerCase()) ||
+               item.toLowerCase().includes(product.badge.toLowerCase());
       });
-    }
-    
-    // When not searching, return results as-is (already filtered to selected items if any)
-    return uniqueResults;
-  }, [searchQuery, currentWishlist, allProducts, selectedItems]);
-
-  // Handle search input change
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(e.target.value);
-  };
-
-  // Clear search
-  const handleClearSearch = () => {
-    setSearchQuery("");
-  };
-
-  // Handle adding item to wishlist (from search results)
-  const handleAddToWishlist = (product: any) => {
-    // Check for duplicates in both manual items and default items
-    const isAlreadyInManualItems = manuallyAddedItems.some(item => item.id === product.id);
-    const isAlreadyInDefaultItems = defaultItems.some(item => item.id === product.id);
-    
-    if (!isAlreadyInManualItems && !isAlreadyInDefaultItems) {
-      setManuallyAddedItems(prev => removeDuplicatesFromWishlist([...prev, product]));
-      setHasManualAdditions(true);
-      showToastMessage(`${product.name} added to shopping list`);
-    } else {
-      showToastMessage(`${product.name} is already in shopping list`);
-    }
-  };
-
-  // Handle removing an item from the wishlist
-  const handleRemoveItem = (itemId: number) => {
-    if (hasManualAdditions) {
-      // Remove from manually added items
-      const itemToRemove = manuallyAddedItems.find(item => item.id === itemId);
-      if (itemToRemove) {
-        const newManualItems = removeDuplicatesFromWishlist(manuallyAddedItems.filter(item => item.id !== itemId));
-        setManuallyAddedItems(newManualItems);
-        
-        // If no manual items left, go back to showing default items
-        if (newManualItems.length === 0) {
-          setHasManualAdditions(false);
-        }
-        
-        setSelectedItems(prev => prev.filter(id => id !== itemId));
-        showToastMessage(`${itemToRemove.name} removed from shopping list`);
-      }
-    } else {
-      // Remove from default items (convert to manual mode)
-      const itemToRemove = defaultItems.find(item => item.id === itemId);
-      if (itemToRemove) {
-        const remainingDefaultItems = removeDuplicatesFromWishlist(defaultItems.filter(item => item.id !== itemId));
-        setManuallyAddedItems(remainingDefaultItems);
-        setHasManualAdditions(true);
-        setSelectedItems(prev => prev.filter(id => id !== itemId));
-        showToastMessage(`${itemToRemove.name} removed from shopping list`);
-      }
-    }
-  };
-
-  const showToastMessage = (message: string) => {
-    setShowToast(message);
-    setTimeout(() => setShowToast(""), 3000);
-  };
-
-  const handleToggleSelect = (itemId: number) => {
-    setSelectedItems(prev => {
-      const isCurrentlySelected = prev.includes(itemId);
-      const newSelected = isCurrentlySelected
-        ? prev.filter(id => id !== itemId)
-        : [...prev, itemId];
-      
-      // Find the item in current results
-      const item = filteredSearchResults.find(item => item.id === itemId);
-      
-      if (item) {
-        // If selecting an item during search, check if it needs to be added to wishlist
-        if (!isCurrentlySelected && searchQuery.trim()) {
-          // Check if item is already in wishlist (both manual and default items)
-          const isAlreadyInManualItems = manuallyAddedItems.some(wishItem => wishItem.id === itemId);
-          const isAlreadyInDefaultItems = defaultItems.some(wishItem => wishItem.id === itemId);
-          
-          if (!isAlreadyInManualItems && !isAlreadyInDefaultItems) {
-                         // Add to wishlist without duplicates
-             setManuallyAddedItems(prevManual => {
-               // Double-check to prevent race conditions
-               const stillNotInList = !prevManual.some(wishItem => wishItem.id === itemId);
-               if (stillNotInList) {
-                 setHasManualAdditions(true);
-                 showToastMessage(`${item.name} added to shopping list and selected`);
-                 return removeDuplicatesFromWishlist([...prevManual, item]);
-               }
-               return prevManual;
-             });
-          } else {
-            // Item already in wishlist, just select it
-            showToastMessage(`${item.name} selected`);
-          }
-        } else {
-          // Regular selection toggle
-          if (isCurrentlySelected) {
-            showToastMessage(`${item.name} removed from selection`);
-          } else {
-            showToastMessage(`${item.name} added to selection`);
-          }
-        }
-      }
-      
-      return newSelected;
     });
+
+    // If no direct matches, try broader category matching
+    if (matchedProducts.length === 0) {
+      const categoryMatches = products.filter(product => {
+        return shoppingList.some(item => {
+          const itemWords = item.toLowerCase().split(' ');
+          const productWords = product.name.toLowerCase().split(' ');
+          
+          // Check if any word from shopping list matches any word from product
+          return itemWords.some(itemWord => 
+            productWords.some(productWord => 
+              productWord.includes(itemWord) || itemWord.includes(productWord)
+            )
+          );
+        });
+      });
+      setCuratedProducts(categoryMatches.slice(0, 10)); // Limit to 10 products
+    } else {
+      setCuratedProducts(matchedProducts);
+    }
+
+    setIsCurateMode(true);
   };
 
-  const handleSelectAll = () => {
-    if (selectedItems.length === filteredSearchResults.length) {
-      setSelectedItems([]);
-      showToastMessage("All items deselected");
+  const handleBackToList = () => {
+    setIsCurateMode(false);
+    setCuratedProducts([]);
+  };
+
+  const handleAddToCart = (product: any) => {
+    addItem(product);
+    showToast(`${product.name} added to cart!`);
+  };
+
+  const handleIncreaseQuantity = (product: any) => {
+    const cartItem = items.find(item => item.id === product.id);
+    if (cartItem) {
+      updateQuantity(product.id, cartItem.quantity + 1);
     } else {
-      setSelectedItems(filteredSearchResults.map(item => item.id));
-      showToastMessage("All items selected");
+      addItem(product);
+    }
+    showToast(`${product.name} quantity updated`);
+  };
+
+  const handleDecreaseQuantity = (product: any) => {
+    const cartItem = items.find(item => item.id === product.id);
+    if (cartItem) {
+      if (cartItem.quantity === 1) {
+        removeItem(product.id);
+        showToast(`${product.name} removed from cart`);
+      } else {
+        updateQuantity(product.id, cartItem.quantity - 1);
+        showToast(`${product.name} quantity updated`);
+      }
     }
   };
-
-  const handleSelectAllCheckbox = () => {
-    // Alternative way to select all via checkbox in header
-    handleSelectAll();
-  };
-
-  const isAllSelected = selectedItems.length === filteredSearchResults.length && filteredSearchResults.length > 0;
-  const isPartiallySelected = selectedItems.length > 0 && selectedItems.length < filteredSearchResults.length;
 
   return (
     <div className="min-h-screen bg-green-50 px-4 py-6">
-      {/* Header */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Link
-              href="/"
-              className="p-1 hover:bg-green-100 rounded-lg transition-colors"
-            >
-              <svg
-                className="w-6 h-6 text-green-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
-            </Link>
-            <h1 className="text-2xl font-bold text-gray-900">Shopping List</h1>
-          </div>
-          
-          <div className="flex items-center gap-3">
-            {/* Master Select All Checkbox */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleSelectAllCheckbox}
-                className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                  isAllSelected
-                    ? 'bg-green-600 border-green-600'
-                    : isPartiallySelected
-                    ? 'bg-green-200 border-green-400'
-                    : 'border-gray-300 hover:border-green-500'
-                }`}
-              >
-                {isAllSelected && (
-                  <svg
-                    className="w-4 h-4 text-white"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                )}
-                {isPartiallySelected && !isAllSelected && (
-                  <div className="w-3 h-0.5 bg-green-600 rounded"></div>
-                )}
-              </button>
-              <span className="text-sm text-gray-600 font-medium">
-                {isAllSelected ? 'Deselect All' : 'Select All'}
-              </span>
-            </div>
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
+          <div className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
+            <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            <span className="text-sm">{toast}</span>
           </div>
         </div>
-        
-        {/* Search Box */}
-        <div className="mt-4 mb-4">
-          <div className="relative">
+      )}
+
+      {/* Header */}
+      <div className="mb-6">
+        <div className="flex items-center gap-2">
+          <Link
+            href="/"
+            className="p-1 hover:bg-green-100 rounded-lg transition-colors"
+          >
             <svg
-              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+              className="w-6 h-6 text-green-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -277,24 +148,24 @@ export default function WishlistPage() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                d="M15 19l-7-7 7-7"
               />
             </svg>
-            <input
-              type="text"
-              placeholder="Search shopping list items..."
-              value={searchQuery}
-              onChange={handleSearchChange}
-              className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            />
-            {searchQuery && (
-              <button
-                onClick={handleClearSearch}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
-                title="Clear search"
-              >
+          </Link>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {isCurateMode ? "Curated Products" : "Shopping List"}
+          </h1>
+        </div>
+      </div>
+
+      {!isCurateMode ? (
+        <>
+          {/* Add Item Input */}
+          <div className="mb-6">
+            <div className="relative">
+              {shoppingList.length > 0 && (
                 <svg
-                  className="w-4 h-4 text-gray-400 hover:text-gray-600"
+                  className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -303,218 +174,26 @@ export default function WishlistPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
                 </svg>
-              </button>
-            )}
-          </div>
-        </div>
-        
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600">
-            {selectedItems.length} of {filteredSearchResults.length} items selected
-          </p>
-          {selectedItems.length > 0 && (
-            <div className="flex items-center gap-2 text-green-600">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span className="text-sm font-medium">Ready to add to cart</span>
-            </div>
-          )}
-        </div>
-        
-        {/* List Type Indicator */}
-        {!searchQuery && (
-          <div className="flex items-center gap-2 mt-3 mb-4">
-            {selectedItems.length > 0 ? (
-              <div className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-                Selected Items Only ({selectedItems.length} items)
-              </div>
-            ) : hasManualAdditions ? (
-              <div className="flex items-center gap-1 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-                Your Curated List ({manuallyAddedItems.length} items)
-              </div>
-            ) : (
-              <div className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Default Suggestions (5 items)
-              </div>
-            )}
-            {hasManualAdditions && selectedItems.length === 0 && (
-              <button
-                onClick={() => {
-                  setManuallyAddedItems([]);
-                  setHasManualAdditions(false);
-                  setSelectedItems([]);
-                  showToastMessage("Switched back to default suggestions");
-                }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline"
-              >
-                Reset to defaults
-              </button>
-            )}
-            {selectedItems.length > 0 && (
-              <button
-                onClick={() => {
-                  setSelectedItems([]);
-                  showToastMessage("All selections cleared");
-                }}
-                className="text-xs text-gray-400 hover:text-gray-600 underline"
-              >
-                Clear selections
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Toast Notification */}
-      {showToast && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 animate-slide-down">
-          <div className="bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2">
-            <svg className="w-4 h-4 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-            </svg>
-            <span className="text-sm">{showToast}</span>
-          </div>
-        </div>
-      )}
-
-      {/* No Results Message */}
-      {filteredSearchResults.length === 0 && searchQuery && (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              )}
+              <input
+                type="text"
+                placeholder="Add new item to your shopping list..."
+                value={newItemInput}
+                onChange={handleInputChange}
+                onKeyPress={handleKeyPress}
+                className={`w-full ${shoppingList.length > 0 ? 'pl-10' : 'pl-4'} pr-24 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-500`}
               />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No products found
-          </h3>
-          <p className="text-gray-600 mb-4">
-            No products match your search for "{searchQuery}". Try searching for something else.
-          </p>
-          <button
-            onClick={handleClearSearch}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Clear Search
-          </button>
-        </div>
-      )}
-
-      {/* Empty Selected Items Message */}
-      {filteredSearchResults.length === 0 && !searchQuery && selectedItems.length > 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Selected items not in current list
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Your selected items have been removed from the list. Clear selections to see your full shopping list.
-          </p>
-          <button
-            onClick={() => {
-              setSelectedItems([]);
-              showToastMessage("All selections cleared");
-            }}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
-          >
-            Clear Selections
-          </button>
-        </div>
-      )}
-
-      {/* Empty Shopping List Message */}
-      {currentWishlist.length === 0 && (
-        <div className="text-center py-12">
-          <div className="text-gray-400 mb-4">
-            <svg
-              className="w-16 h-16 mx-auto mb-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Your shopping list is empty
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Add items to your shopping list to keep track of what you need to buy.
-          </p>
-          <Link
-            href="/"
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-block"
-          >
-            Browse Products
-          </Link>
-        </div>
-      )}
-
-            {/* Wishlist Items */}
-      {filteredSearchResults.length > 0 && (
-        <div className="space-y-4">
-          {filteredSearchResults.map((item) => (
-            <div
-              key={item.id}
-            className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 transition-all duration-200 ${
-              selectedItems.includes(item.id) ? 'ring-2 ring-green-500 border-green-300' : 'hover:shadow-md'
-            }`}
-          >
-            <div className="flex items-center gap-4">
-              {/* Check Button */}
-              <button
-                onClick={() => handleToggleSelect(item.id)}
-                className={`w-6 h-6 rounded-md border-2 flex items-center justify-center transition-all duration-200 ${
-                  selectedItems.includes(item.id)
-                    ? 'bg-green-600 border-green-600'
-                    : 'border-gray-300 hover:border-green-500'
-                }`}
-              >
-                {selectedItems.includes(item.id) && (
+              {newItemInput && (
+                <button
+                  onClick={handleClearInput}
+                  className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Clear input"
+                >
                   <svg
-                    className="w-4 h-4 text-white"
+                    className="w-4 h-4 text-gray-400 hover:text-gray-600"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -523,53 +202,42 @@ export default function WishlistPage() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth={2}
-                      d="M5 13l4 4L19 7"
+                      d="M6 18L18 6M6 6l12 12"
                     />
                   </svg>
-                )}
-              </button>
-
-              {/* Product Visual */}
-              <div
-                className={`w-16 h-16 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center flex-shrink-0`}
+                </button>
+              )}
+              <button
+                onClick={handleAddItem}
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-green-600 text-white px-3 py-1.5 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
               >
-                <div className="text-2xl">
-                  {item.icon}
-                </div>
-              </div>
+                Add
+              </button>
+            </div>
+          </div>
 
-              {/* Product Details */}
-              <div className="flex-1">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-2">
-                      {item.name}
-                    </h3>
-                    <span
-                      className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(item.badge)}`}
-                    >
-                      {item.badge}
-                    </span>
+          {/* Shopping List Items */}
+          {shoppingList.length > 0 ? (
+            <div className="space-y-3 mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Your Items ({shoppingList.length})
+              </h3>
+              {shoppingList.map((item, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span className="text-gray-900 font-medium">{item}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="font-bold text-green-600 text-xl">
-                      {item.price}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dynamic Action Button */}
-              {searchQuery ? (
-                // Show Add button for search results not in wishlist
-                currentWishlist.some(wishItem => wishItem.id === item.id) ? (
                   <button
-                    onClick={() => handleRemoveItem(item.id)}
+                    onClick={() => handleRemoveItem(index)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Remove from shopping list"
+                    title="Remove item"
                   >
                     <svg
-                      className="w-5 h-5"
+                      className="w-4 h-4"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -582,96 +250,287 @@ export default function WishlistPage() {
                       />
                     </svg>
                   </button>
-                ) : (
-                  <button
-                    onClick={() => handleAddToWishlist(item)}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                    title="Add to shopping list"
-                  >
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
-                  </button>
-                )
-              ) : (
-                // Show Remove button for wishlist items
-                <button
-                  onClick={() => handleRemoveItem(item.id)}
-                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                  title="Remove from shopping list"
+                </div>
+              ))}
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="w-16 h-16 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
-                    />
-                  </svg>
-                </button>
-              )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Your shopping list is empty
+              </h3>
+              <p className="text-gray-600">
+                Start adding items using the input box above to keep track of what you need.
+              </p>
             </div>
-          </div>
-          ))}
-        </div>
-      )}
+          )}
 
-      {/* Action Buttons */}
-      {selectedItems.length > 0 && (
-        <div className="fixed bottom-6 left-4 right-4 bg-white rounded-xl shadow-lg border border-gray-200 p-4 animate-slide-up">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="text-gray-600">
-                {selectedItems.length} item{selectedItems.length > 1 ? 's' : ''} selected
-              </span>
-              {isAllSelected && (
-                <span className="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                  All Items
-                </span>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => {
-                  showToastMessage(`${selectedItems.length} items added to cart`);
-                  // Add cart functionality here
-                }}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center gap-2"
+          {/* Curate Shopping List Button */}
+          <div className="mt-8 text-center">
+            <button 
+              onClick={handleCurateShoppingList}
+              disabled={shoppingList.length === 0}
+              className={`inline-flex items-center gap-2 px-6 py-3 rounded-lg transition-colors font-medium ${
+                shoppingList.length === 0 
+                  ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                  : 'bg-green-600 text-white hover:bg-green-700'
+              }`}
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                </svg>
-                Add to Cart
-              </button>
-              <button 
-                onClick={() => {
-                  setSelectedItems([]);
-                  showToastMessage("Selection cleared");
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-                Clear Selection
-              </button>
-            </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
+                />
+              </svg>
+              Curate Shopping List
+            </button>
           </div>
+        </>
+      ) : (
+        /* Curated Products View */
+        <div>
+          {/* Back Button */}
+          <div className="mb-6">
+            <button
+              onClick={handleBackToList}
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+              Back to Shopping List
+            </button>
+          </div>
+
+          {/* Curated Products */}
+          {curatedProducts.length > 0 ? (
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Recommended Products ({curatedProducts.length})
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Based on your shopping list, we found these matching products:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {curatedProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center gap-4">
+                      {/* Product Visual */}
+                      <div
+                        className={`w-16 h-16 bg-gradient-to-br ${product.color} rounded-xl flex items-center justify-center flex-shrink-0`}
+                      >
+                        <div className="text-2xl">
+                          {product.icon}
+                        </div>
+                      </div>
+
+                      {/* Product Details */}
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold text-gray-900 text-lg mb-2">
+                              {product.name}
+                            </h4>
+                            <span
+                              className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(product.badge)}`}
+                            >
+                              {product.badge}
+                            </span>
+                          </div>
+                          <div className="text-right">
+                            <span className="font-bold text-green-600 text-xl">
+                              {product.price}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Quantity Controls */}
+                      {(() => {
+                        const cartItem = items.find(item => item.id === product.id);
+                        const quantity = cartItem ? cartItem.quantity : 0;
+                        
+                        if (quantity === 0) {
+                          return (
+                            <button
+                              onClick={() => handleIncreaseQuantity(product)}
+                              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                              title="Add to cart"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                />
+                              </svg>
+                              <span className="text-sm">Add</span>
+                            </button>
+                          );
+                        }
+                        
+                        return (
+                          <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
+                            <button
+                              onClick={() => handleDecreaseQuantity(product)}
+                              className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors flex-shrink-0"
+                              title="Decrease quantity"
+                            >
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M20 12H4"
+                                />
+                              </svg>
+                            </button>
+                            <span className="px-2 py-1 text-gray-900 font-bold text-sm min-w-[28px] text-center flex-shrink-0">
+                              {quantity}
+                            </span>
+                            <button
+                              onClick={() => handleIncreaseQuantity(product)}
+                              className="w-7 h-7 flex items-center justify-center bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex-shrink-0"
+                              title="Increase quantity"
+                            >
+                              <svg
+                                className="w-3 h-3"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={3}
+                                  d="M12 4v16m8-8H4"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                                  ))}
+                </div>
+                
+                {/* Go to Cart Button */}
+                {items.length > 0 && (
+                  <div className="text-center">
+                    <Link
+                      href="/cart"
+                      className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                        />
+                      </svg>
+                      Go to Cart
+                      {items.length > 0 && (
+                        <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                          {items.reduce((total, item) => total + item.quantity, 0)}
+                        </span>
+                      )}
+                    </Link>
+                  </div>
+                )}
+              </div>
+          ) : (
+            /* No Matches Found */
+            <div className="text-center py-16">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="w-16 h-16 mx-auto mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={1.5}
+                    d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No matching products found
+              </h3>
+              <p className="text-gray-600 mb-6">
+                We couldn't find products matching your shopping list items. Try browsing our catalog or modify your shopping list.
+              </p>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={handleBackToList}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  Back to Shopping List
+                </button>
+                <Link
+                  href="/"
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                >
+                  Browse Products
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
