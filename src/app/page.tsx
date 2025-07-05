@@ -185,7 +185,7 @@ export default function GroceryPage() {
               <input
                 type="text"
                 placeholder="Search for groceries..."
-                className="w-full pl-10 pr-20 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                className="w-full pl-10 pr-24 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 value={searchQuery}
                 onChange={handleSearchChange}
               />
@@ -194,7 +194,7 @@ export default function GroceryPage() {
               {searchQuery && (
                 <button
                   onClick={handleClearSearch}
-                  className="absolute right-16 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  className="absolute right-20 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
                   title="Clear search"
                 >
                   <svg

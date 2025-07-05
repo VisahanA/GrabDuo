@@ -2,72 +2,34 @@
 
 import Link from "next/link";
 import { useState, useMemo } from "react";
+import { products } from "../products";
+import { getBadgeStyles } from "../badge";
 
 export default function WishlistPage() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [showToast, setShowToast] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // Initialize with first 5 products as default wishlist items
+  const [wishlistItems, setWishlistItems] = useState(() => {
+    return products.slice(0, 5);
+  });
 
-  const wishlistItems = [
-    {
-      id: 1,
-      name: "Fresh Organic Bananas",
-      price: "S$4.00",
-      icon: "🍌",
-      color: "from-yellow-400 to-yellow-600",
-      badge: "Fresh",
-      description: "Premium organic bananas, perfect for snacking"
-    },
-    {
-      id: 2,
-      name: "Whole Milk",
-      price: "S$4.70",
-      icon: "🥛",
-      color: "from-blue-400 to-blue-600",
-      badge: "Dairy",
-      description: "Fresh whole milk from local farms"
-    },
-    {
-      id: 3,
-      name: "Sourdough Bread",
-      price: "S$6.70",
-      icon: "🍞",
-      color: "from-amber-400 to-amber-600",
-      badge: "Bakery",
-      description: "Artisanal sourdough bread, freshly baked"
-    },
-    {
-      id: 4,
-      name: "Greek Yogurt",
-      price: "S$8.00",
-      icon: "🥛",
-      color: "from-purple-400 to-purple-600",
-      badge: "Organic",
-      description: "Creamy Greek yogurt with live cultures"
-    },
-    {
-      id: 5,
-      name: "Fresh Avocados",
-      price: "S$9.40",
-      icon: "🥑",
-      color: "from-green-400 to-green-600",
-      badge: "Premium",
-      description: "Ripe avocados, perfect for toast or salads"
-    }
-  ];
+  // All products available for search
+  const allProducts = products;
 
-  // Filter items based on search query
-  const filteredItems = useMemo(() => {
+  // Filter products based on search query (search across ALL products)
+  const filteredSearchResults = useMemo(() => {
     if (!searchQuery.trim()) {
-      return wishlistItems;
+      return wishlistItems; // Show current wishlist items when no search
     }
     
     const query = searchQuery.toLowerCase();
-    return wishlistItems.filter(item => 
-      item.name.toLowerCase().includes(query) ||
-      item.badge.toLowerCase().includes(query)
+    return allProducts.filter(product => 
+      product.name.toLowerCase().includes(query) ||
+      product.badge.toLowerCase().includes(query)
     );
-  }, [searchQuery]);
+  }, [searchQuery, wishlistItems, allProducts]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,6 +39,27 @@ export default function WishlistPage() {
   // Clear search
   const handleClearSearch = () => {
     setSearchQuery("");
+  };
+
+  // Handle adding item to wishlist (from search results)
+  const handleAddToWishlist = (product: any) => {
+    const isAlreadyInWishlist = wishlistItems.some(item => item.id === product.id);
+    if (!isAlreadyInWishlist) {
+      setWishlistItems(prev => [...prev, product]);
+      showToastMessage(`${product.name} added to shopping list`);
+    } else {
+      showToastMessage(`${product.name} is already in shopping list`);
+    }
+  };
+
+  // Handle removing an item from the wishlist
+  const handleRemoveItem = (itemId: number) => {
+    const itemToRemove = wishlistItems.find(item => item.id === itemId);
+    if (itemToRemove) {
+      setWishlistItems(prev => prev.filter(item => item.id !== itemId));
+      setSelectedItems(prev => prev.filter(id => id !== itemId));
+      showToastMessage(`${itemToRemove.name} removed from shopping list`);
+    }
   };
 
   const showToastMessage = (message: string) => {
@@ -103,11 +86,11 @@ export default function WishlistPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedItems.length === wishlistItems.length) {
+    if (selectedItems.length === filteredSearchResults.length) {
       setSelectedItems([]);
       showToastMessage("All items deselected");
     } else {
-      setSelectedItems(wishlistItems.map(item => item.id));
+      setSelectedItems(filteredSearchResults.map(item => item.id));
       showToastMessage("All items selected");
     }
   };
@@ -117,25 +100,8 @@ export default function WishlistPage() {
     handleSelectAll();
   };
 
-  const isAllSelected = selectedItems.length === wishlistItems.length;
-  const isPartiallySelected = selectedItems.length > 0 && selectedItems.length < wishlistItems.length;
-
-  const getBadgeStyles = (badge: string) => {
-    switch (badge) {
-      case "Fresh":
-        return "bg-green-100 text-green-800";
-      case "Dairy":
-        return "bg-blue-100 text-blue-800";
-      case "Bakery":
-        return "bg-amber-100 text-amber-800";
-      case "Organic":
-        return "bg-purple-100 text-purple-800";
-      case "Premium":
-        return "bg-red-100 text-red-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
+  const isAllSelected = selectedItems.length === filteredSearchResults.length && filteredSearchResults.length > 0;
+  const isPartiallySelected = selectedItems.length > 0 && selectedItems.length < filteredSearchResults.length;
 
   return (
     <div className="min-h-screen bg-green-50 px-4 py-6">
@@ -252,7 +218,7 @@ export default function WishlistPage() {
         
         <div className="flex items-center justify-between">
           <p className="text-gray-600">
-            {selectedItems.length} of {filteredItems.length} items selected
+            {selectedItems.length} of {filteredSearchResults.length} items selected
           </p>
           {selectedItems.length > 0 && (
             <div className="flex items-center gap-2 text-green-600">
@@ -278,7 +244,7 @@ export default function WishlistPage() {
       )}
 
       {/* No Results Message */}
-      {filteredItems.length === 0 && searchQuery && (
+      {filteredSearchResults.length === 0 && searchQuery && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <svg
@@ -310,10 +276,43 @@ export default function WishlistPage() {
         </div>
       )}
 
+      {/* Empty Shopping List Message */}
+      {wishlistItems.length === 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Your shopping list is empty
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Add items to your shopping list to keep track of what you need to buy.
+          </p>
+          <Link
+            href="/"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors inline-block"
+          >
+            Browse Products
+          </Link>
+        </div>
+      )}
+
       {/* Wishlist Items */}
-      {filteredItems.length > 0 && (
+      {filteredSearchResults.length > 0 && (
         <div className="space-y-4">
-          {filteredItems.map((item) => (
+          {filteredSearchResults.map((item) => (
           <div
             key={item.id}
             className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 transition-all duration-200 ${
@@ -377,25 +376,72 @@ export default function WishlistPage() {
                 </div>
               </div>
 
-              {/* Remove from Shopping List */}
-              <button
-                className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                title="Remove from shopping list"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+              {/* Dynamic Action Button */}
+              {searchQuery ? (
+                // Show Add button for search results not in wishlist
+                wishlistItems.some(wishItem => wishItem.id === item.id) ? (
+                  <button
+                    onClick={() => handleRemoveItem(item.id)}
+                    className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Remove from shopping list"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleAddToWishlist(item)}
+                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="Add to shopping list"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
+                    </svg>
+                  </button>
+                )
+              ) : (
+                // Show Remove button for wishlist items
+                <button
+                  onClick={() => handleRemoveItem(item.id)}
+                  className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Remove from shopping list"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
-                  />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
         ))}
