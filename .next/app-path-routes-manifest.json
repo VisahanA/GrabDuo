@@ -1,9 +1,0 @@
-{
-  "/api/products/route": "/api/products",
-  "/_not-found/page": "/_not-found",
-  "/favicon.ico/route": "/favicon.ico",
-  "/profile/page": "/profile",
-  "/page": "/",
-  "/wishlist/page": "/wishlist",
-  "/cart/page": "/cart"
-}
