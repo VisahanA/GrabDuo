@@ -2,6 +2,20 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 
+// Helper function to get file extension from MIME type
+function getFileExtension(mimeType: string): string {
+  const mimeToExt: { [key: string]: string } = {
+    'audio/wav': 'wav',
+    'audio/webm': 'webm',
+    'audio/mp4': 'mp4',
+    'audio/mpeg': 'mp3',
+    'audio/ogg': 'ogg',
+    'audio/webm;codecs=opus': 'webm'
+  };
+  
+  return mimeToExt[mimeType] || 'wav'; // Default to wav if unknown
+}
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -22,9 +36,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique filename
+    // Generate unique filename with correct extension
     const timestamp = Date.now();
-    const filename = `audio_${timestamp}.wav`;
+    const fileExtension = getFileExtension(file.type);
+    const filename = `audio_${timestamp}.${fileExtension}`;
     const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
 
     // Create uploads directory if it doesn't exist

@@ -84,6 +84,18 @@ var __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$2
 ;
 ;
 ;
+// Helper function to get file extension from MIME type
+function getFileExtension(mimeType) {
+    const mimeToExt = {
+        'audio/wav': 'wav',
+        'audio/webm': 'webm',
+        'audio/mp4': 'mp4',
+        'audio/mpeg': 'mp3',
+        'audio/ogg': 'ogg',
+        'audio/webm;codecs=opus': 'webm'
+    };
+    return mimeToExt[mimeType] || 'wav'; // Default to wav if unknown
+}
 async function POST(request) {
     try {
         const formData = await request.formData();
@@ -105,9 +117,10 @@ async function POST(request) {
                 status: 400
             });
         }
-        // Generate unique filename
+        // Generate unique filename with correct extension
         const timestamp = Date.now();
-        const filename = `audio_${timestamp}.wav`;
+        const fileExtension = getFileExtension(file.type);
+        const filename = `audio_${timestamp}.${fileExtension}`;
         const filepath = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'public', 'uploads', filename);
         // Create uploads directory if it doesn't exist
         const uploadsDir = __TURBOPACK__imported__module__$5b$externals$5d2f$path__$5b$external$5d$__$28$path$2c$__cjs$29$__["default"].join(process.cwd(), 'public', 'uploads');

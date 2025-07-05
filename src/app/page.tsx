@@ -250,7 +250,23 @@ export default function GroceryPage() {
       `;
       document.body.appendChild(recordingToast);
 
-      const mediaRecorder = new MediaRecorder(stream);
+      // Configure MediaRecorder with better audio options
+      const options: MediaRecorderOptions = {};
+      
+      // Try to use WAV format if supported, otherwise use best available
+      if (MediaRecorder.isTypeSupported('audio/wav')) {
+        options.mimeType = 'audio/wav';
+      } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+        options.mimeType = 'audio/webm;codecs=opus';
+      } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+        options.mimeType = 'audio/webm';
+      } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        options.mimeType = 'audio/mp4';
+      }
+      
+      console.log('🎙️ Using MediaRecorder with mimeType:', options.mimeType);
+      
+      const mediaRecorder = new MediaRecorder(stream, options);
       const audioChunks: BlobPart[] = [];
       let autoStopTimer: NodeJS.Timeout | null = null;
 
@@ -301,8 +317,11 @@ export default function GroceryPage() {
           return;
         }
         
-        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        // Create audio blob with the actual recorded format
+        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/wav' });
         console.log('🎵 Created audio blob:', audioBlob.size, 'bytes, type:', audioBlob.type);
+        console.log('🎵 Audio chunks count:', audioChunks.length);
+        console.log('🎵 MediaRecorder mimeType:', mediaRecorder.mimeType);
         
         if (audioBlob.size === 0) {
           console.warn('⚠️ Audio blob is empty');
@@ -354,23 +373,31 @@ export default function GroceryPage() {
           // Approach 1: Try sending audio file directly (if supported)
           try {
             console.log('🗣️ Trying STT API with file upload...');
+            console.log('🎵 Audio blob details:', {
+              size: audioBlob.size,
+              type: audioBlob.type,
+              chunks: audioChunks.length
+            });
+            
             const formData = new FormData();
             formData.append('audio_file', audioBlob, 'recording.wav');
             formData.append('confidence_threshold', '0');
 
+            console.log('📤 Sending FormData to STT API...');
             sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
               method: 'POST',
               body: formData,
             });
 
             console.log('🗣️ STT API (file upload) response status:', sttResponse.status);
+            console.log('🗣️ STT API (file upload) response headers:', Object.fromEntries(sttResponse.headers.entries()));
 
             if (sttResponse.ok) {
               sttResult = await sttResponse.json();
               console.log('✅ STT API (file upload) success:', sttResult);
             } else {
               const errorText = await sttResponse.text();
-              console.warn('❌ STT API (file upload) failed:', errorText);
+              console.warn('❌ STT API (file upload) failed:', sttResponse.status, errorText);
               sttResponse = null; // Reset for next attempt
             }
           } catch (fileUploadError) {
@@ -382,6 +409,7 @@ export default function GroceryPage() {
           if (!sttResponse || !sttResponse.ok) {
             try {
               console.log('🗣️ Trying STT API with base64 audio...');
+              console.log('🎵 Converting audio blob to base64...');
               
               // Convert audio blob to base64
               const audioBase64 = await new Promise<string>((resolve, reject) => {
@@ -418,6 +446,9 @@ export default function GroceryPage() {
                 }
               });
 
+              console.log('✅ Base64 conversion successful, length:', audioBase64.length);
+              console.log('📤 Sending base64 audio to STT API...');
+
               sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
                 method: 'POST',
                 headers: {
@@ -426,52 +457,73 @@ export default function GroceryPage() {
                 },
                 body: JSON.stringify({
                   audio_data: audioBase64,
-                  audio_format: 'wav',
+                  audio_format: mediaRecorder.mimeType?.includes('webm') ? 'webm' : 'wav',
                   confidence_threshold: 0
                 })
               });
 
               console.log('🗣️ STT API (base64) response status:', sttResponse.status);
+              console.log('🗣️ STT API (base64) response headers:', Object.fromEntries(sttResponse.headers.entries()));
 
-              if (sttResponse.ok) {
-                sttResult = await sttResponse.json();
-                console.log('✅ STT API (base64) success:', sttResult);
-              } else {
-                const errorText = await sttResponse.text();
-                console.warn('❌ STT API (base64) failed:', errorText);
-                sttResponse = null;
-              }
+                              if (sttResponse.ok) {
+                  sttResult = await sttResponse.json();
+                  console.log('✅ STT API (base64) success:', sttResult);
+                } else {
+                  const errorText = await sttResponse.text();
+                  console.warn('❌ STT API (base64) failed:', sttResponse.status, errorText);
+                  sttResponse = null;
+                }
             } catch (base64Error) {
               console.warn('❌ STT API base64 approach failed:', base64Error);
               sttResponse = null;
             }
           }
 
-          // Approach 3: Fallback to URL approach with public placeholder (if all else fails)
+          // Approach 3: Upload audio file and use URL (if other approaches fail)
           if (!sttResponse || !sttResponse.ok) {
             try {
-              console.log('🗣️ Trying STT API with fallback URL...');
+              console.log('🗣️ Trying STT API with audio upload and URL...');
               
-              sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
+              // First, upload the audio file to get a URL
+              const uploadFormData = new FormData();
+              uploadFormData.append('audio', audioBlob, 'recording.wav');
+              
+              const uploadResponse = await fetch('/api/upload-audio', {
                 method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json',
-                },
-                body: JSON.stringify({
-                  audio_url: 'http://localhost:3000/uploads/audio_1751756292580.wav',
-                  confidence_threshold: 0
-                })
+                body: uploadFormData,
               });
+              
+              if (uploadResponse.ok) {
+                const uploadResult = await uploadResponse.json();
+                console.log('✅ Audio uploaded successfully:', uploadResult);
+                
+                // Now use the uploaded file URL for STT
+                sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                  },
+                  body: JSON.stringify({
+                    audio_url: uploadResult.url,
+                    confidence_threshold: 0
+                  })
+                });
 
-              console.log('🗣️ STT API (fallback) response status:', sttResponse.status);
+                console.log('🗣️ STT API (upload URL) response status:', sttResponse.status);
 
-              if (sttResponse.ok) {
-                sttResult = await sttResponse.json();
-                console.log('✅ STT API (fallback) success - using demo audio:', sttResult);
+                if (sttResponse.ok) {
+                  sttResult = await sttResponse.json();
+                  console.log('✅ STT API (upload URL) success - using your recorded audio:', sttResult);
+                } else {
+                  const errorText = await sttResponse.text();
+                  console.warn('❌ STT API (upload URL) failed:', errorText);
+                }
+              } else {
+                console.warn('❌ Audio upload failed:', uploadResponse.status);
               }
             } catch (fallbackError) {
-              console.warn('❌ STT API fallback approach failed:', fallbackError);
+              console.warn('❌ STT API upload approach failed:', fallbackError);
             }
           }
 
