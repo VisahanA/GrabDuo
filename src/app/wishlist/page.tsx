@@ -10,26 +10,68 @@ export default function WishlistPage() {
   const [showToast, setShowToast] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Initialize with first 5 products as default wishlist items
-  const [wishlistItems, setWishlistItems] = useState(() => {
-    return products.slice(0, 5);
-  });
+  // Track manually added items vs default items
+  const [manuallyAddedItems, setManuallyAddedItems] = useState<any[]>([]);
+  const [hasManualAdditions, setHasManualAdditions] = useState(false);
+  
+  // Helper function to remove duplicates from wishlist
+  const removeDuplicatesFromWishlist = (items: any[]) => {
+    return items.filter((item, index, self) => 
+      index === self.findIndex(product => product.id === item.id)
+    );
+  };
+  
+  // Get default items (first 5 products)
+  const defaultItems = products.slice(0, 5);
+  
+  // Current wishlist: show manually added items if any, otherwise show default items
+  const currentWishlist = hasManualAdditions ? manuallyAddedItems : defaultItems;
 
   // All products available for search
   const allProducts = products;
 
   // Filter products based on search query (search across ALL products)
   const filteredSearchResults = useMemo(() => {
+    let results;
+    
     if (!searchQuery.trim()) {
-      return wishlistItems; // Show current wishlist items when no search
+      // When no search query
+      if (selectedItems.length > 0) {
+        // Show only selected items from current wishlist
+        results = currentWishlist.filter(item => selectedItems.includes(item.id));
+      } else {
+        // Show current wishlist (manual additions or defaults)
+        results = currentWishlist;
+      }
+    } else {
+      // When searching, search across ALL products
+      const query = searchQuery.toLowerCase();
+      results = allProducts.filter(product => 
+        product.name.toLowerCase().includes(query) ||
+        product.badge.toLowerCase().includes(query)
+      );
     }
     
-    const query = searchQuery.toLowerCase();
-    return allProducts.filter(product => 
-      product.name.toLowerCase().includes(query) ||
-      product.badge.toLowerCase().includes(query)
+    // Remove duplicates based on product ID (safety net)
+    const uniqueResults = results.filter((item, index, self) => 
+      index === self.findIndex(product => product.id === item.id)
     );
-  }, [searchQuery, wishlistItems, allProducts]);
+    
+    // Sort selected items to the top (only relevant when searching)
+    if (searchQuery.trim()) {
+      return uniqueResults.sort((a, b) => {
+        const aSelected = selectedItems.includes(a.id);
+        const bSelected = selectedItems.includes(b.id);
+        
+        if (aSelected && !bSelected) return -1; // a comes first
+        if (!aSelected && bSelected) return 1;  // b comes first
+        return 0; // maintain original order for items with same selection status
+      });
+    }
+    
+    // When not searching, return results as-is (already filtered to selected items if any)
+    return uniqueResults;
+  }, [searchQuery, currentWishlist, allProducts, selectedItems]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,9 +85,13 @@ export default function WishlistPage() {
 
   // Handle adding item to wishlist (from search results)
   const handleAddToWishlist = (product: any) => {
-    const isAlreadyInWishlist = wishlistItems.some(item => item.id === product.id);
-    if (!isAlreadyInWishlist) {
-      setWishlistItems(prev => [...prev, product]);
+    // Check for duplicates in both manual items and default items
+    const isAlreadyInManualItems = manuallyAddedItems.some(item => item.id === product.id);
+    const isAlreadyInDefaultItems = defaultItems.some(item => item.id === product.id);
+    
+    if (!isAlreadyInManualItems && !isAlreadyInDefaultItems) {
+      setManuallyAddedItems(prev => removeDuplicatesFromWishlist([...prev, product]));
+      setHasManualAdditions(true);
       showToastMessage(`${product.name} added to shopping list`);
     } else {
       showToastMessage(`${product.name} is already in shopping list`);
@@ -54,11 +100,31 @@ export default function WishlistPage() {
 
   // Handle removing an item from the wishlist
   const handleRemoveItem = (itemId: number) => {
-    const itemToRemove = wishlistItems.find(item => item.id === itemId);
-    if (itemToRemove) {
-      setWishlistItems(prev => prev.filter(item => item.id !== itemId));
-      setSelectedItems(prev => prev.filter(id => id !== itemId));
-      showToastMessage(`${itemToRemove.name} removed from shopping list`);
+    if (hasManualAdditions) {
+      // Remove from manually added items
+      const itemToRemove = manuallyAddedItems.find(item => item.id === itemId);
+      if (itemToRemove) {
+        const newManualItems = removeDuplicatesFromWishlist(manuallyAddedItems.filter(item => item.id !== itemId));
+        setManuallyAddedItems(newManualItems);
+        
+        // If no manual items left, go back to showing default items
+        if (newManualItems.length === 0) {
+          setHasManualAdditions(false);
+        }
+        
+        setSelectedItems(prev => prev.filter(id => id !== itemId));
+        showToastMessage(`${itemToRemove.name} removed from shopping list`);
+      }
+    } else {
+      // Remove from default items (convert to manual mode)
+      const itemToRemove = defaultItems.find(item => item.id === itemId);
+      if (itemToRemove) {
+        const remainingDefaultItems = removeDuplicatesFromWishlist(defaultItems.filter(item => item.id !== itemId));
+        setManuallyAddedItems(remainingDefaultItems);
+        setHasManualAdditions(true);
+        setSelectedItems(prev => prev.filter(id => id !== itemId));
+        showToastMessage(`${itemToRemove.name} removed from shopping list`);
+      }
     }
   };
 
@@ -69,16 +135,45 @@ export default function WishlistPage() {
 
   const handleToggleSelect = (itemId: number) => {
     setSelectedItems(prev => {
-      const newSelected = prev.includes(itemId)
+      const isCurrentlySelected = prev.includes(itemId);
+      const newSelected = isCurrentlySelected
         ? prev.filter(id => id !== itemId)
         : [...prev, itemId];
       
-      // Show toast for individual selections
-      const item = wishlistItems.find(item => item.id === itemId);
-      if (prev.includes(itemId)) {
-        showToastMessage(`${item?.name} removed from selection`);
-      } else {
-        showToastMessage(`${item?.name} added to selection`);
+      // Find the item in current results
+      const item = filteredSearchResults.find(item => item.id === itemId);
+      
+      if (item) {
+        // If selecting an item during search, check if it needs to be added to wishlist
+        if (!isCurrentlySelected && searchQuery.trim()) {
+          // Check if item is already in wishlist (both manual and default items)
+          const isAlreadyInManualItems = manuallyAddedItems.some(wishItem => wishItem.id === itemId);
+          const isAlreadyInDefaultItems = defaultItems.some(wishItem => wishItem.id === itemId);
+          
+          if (!isAlreadyInManualItems && !isAlreadyInDefaultItems) {
+                         // Add to wishlist without duplicates
+             setManuallyAddedItems(prevManual => {
+               // Double-check to prevent race conditions
+               const stillNotInList = !prevManual.some(wishItem => wishItem.id === itemId);
+               if (stillNotInList) {
+                 setHasManualAdditions(true);
+                 showToastMessage(`${item.name} added to shopping list and selected`);
+                 return removeDuplicatesFromWishlist([...prevManual, item]);
+               }
+               return prevManual;
+             });
+          } else {
+            // Item already in wishlist, just select it
+            showToastMessage(`${item.name} selected`);
+          }
+        } else {
+          // Regular selection toggle
+          if (isCurrentlySelected) {
+            showToastMessage(`${item.name} removed from selection`);
+          } else {
+            showToastMessage(`${item.name} added to selection`);
+          }
+        }
       }
       
       return newSelected;
@@ -229,6 +324,58 @@ export default function WishlistPage() {
             </div>
           )}
         </div>
+        
+        {/* List Type Indicator */}
+        {!searchQuery && (
+          <div className="flex items-center gap-2 mt-3 mb-4">
+            {selectedItems.length > 0 ? (
+              <div className="flex items-center gap-1 text-sm text-green-600 bg-green-50 px-3 py-1 rounded-full">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                </svg>
+                Selected Items Only ({selectedItems.length} items)
+              </div>
+            ) : hasManualAdditions ? (
+              <div className="flex items-center gap-1 text-sm text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Your Curated List ({manuallyAddedItems.length} items)
+              </div>
+            ) : (
+              <div className="flex items-center gap-1 text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Default Suggestions (5 items)
+              </div>
+            )}
+            {hasManualAdditions && selectedItems.length === 0 && (
+              <button
+                onClick={() => {
+                  setManuallyAddedItems([]);
+                  setHasManualAdditions(false);
+                  setSelectedItems([]);
+                  showToastMessage("Switched back to default suggestions");
+                }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline"
+              >
+                Reset to defaults
+              </button>
+            )}
+            {selectedItems.length > 0 && (
+              <button
+                onClick={() => {
+                  setSelectedItems([]);
+                  showToastMessage("All selections cleared");
+                }}
+                className="text-xs text-gray-400 hover:text-gray-600 underline"
+              >
+                Clear selections
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Toast Notification */}
@@ -262,10 +409,10 @@ export default function WishlistPage() {
             </svg>
           </div>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No items found
+            No products found
           </h3>
           <p className="text-gray-600 mb-4">
-            No items match your search for "{searchQuery}". Try searching for something else.
+            No products match your search for "{searchQuery}". Try searching for something else.
           </p>
           <button
             onClick={handleClearSearch}
@@ -276,8 +423,44 @@ export default function WishlistPage() {
         </div>
       )}
 
+      {/* Empty Selected Items Message */}
+      {filteredSearchResults.length === 0 && !searchQuery && selectedItems.length > 0 && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Selected items not in current list
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Your selected items have been removed from the list. Clear selections to see your full shopping list.
+          </p>
+          <button
+            onClick={() => {
+              setSelectedItems([]);
+              showToastMessage("All selections cleared");
+            }}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Clear Selections
+          </button>
+        </div>
+      )}
+
       {/* Empty Shopping List Message */}
-      {wishlistItems.length === 0 && (
+      {currentWishlist.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 mb-4">
             <svg
@@ -309,12 +492,12 @@ export default function WishlistPage() {
         </div>
       )}
 
-      {/* Wishlist Items */}
+            {/* Wishlist Items */}
       {filteredSearchResults.length > 0 && (
         <div className="space-y-4">
           {filteredSearchResults.map((item) => (
-          <div
-            key={item.id}
+            <div
+              key={item.id}
             className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 transition-all duration-200 ${
               selectedItems.includes(item.id) ? 'ring-2 ring-green-500 border-green-300' : 'hover:shadow-md'
             }`}
@@ -379,7 +562,7 @@ export default function WishlistPage() {
               {/* Dynamic Action Button */}
               {searchQuery ? (
                 // Show Add button for search results not in wishlist
-                wishlistItems.some(wishItem => wishItem.id === item.id) ? (
+                currentWishlist.some(wishItem => wishItem.id === item.id) ? (
                   <button
                     onClick={() => handleRemoveItem(item.id)}
                     className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
@@ -444,7 +627,7 @@ export default function WishlistPage() {
               )}
             </div>
           </div>
-        ))}
+          ))}
         </div>
       )}
 
