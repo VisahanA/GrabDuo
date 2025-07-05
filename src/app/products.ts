@@ -257,14 +257,90 @@ export function getProductsByCategory(category: BadgeType, productList: Product[
   return productList.filter(product => product.badge === category);
 }
 
-// Helper function to search products
+// Enhanced confidence-based search function
 export function searchProducts(query: string, productList: Product[] = products): Product[] {
-  const lowercaseQuery = query.toLowerCase();
-  return productList.filter(product => 
-    product.name.toLowerCase().includes(lowercaseQuery) ||
-    product.brands?.toLowerCase().includes(lowercaseQuery) ||
-    product.categories?.toLowerCase().includes(lowercaseQuery)
-  );
+  if (!query.trim()) return productList;
+  
+  const keywords = query.toLowerCase().trim().split(/\s+/).filter(keyword => keyword.length > 0);
+  if (keywords.length === 0) return productList;
+  
+  const scoredProducts = productList.map(product => {
+    let totalScore = 0;
+    let maxPossibleScore = 0;
+    
+    // Define field weights (importance)
+    const fields = [
+      { content: product.name.toLowerCase(), weight: 40 }, // Name is most important
+      { content: product.brands?.toLowerCase() || '', weight: 25 }, // Brand is second
+      { content: product.badge.toLowerCase(), weight: 20 }, // Category is third
+      { content: product.categories?.toLowerCase() || '', weight: 10 }, // Categories
+      { content: product.unitQuantity?.toLowerCase() || '', weight: 3 }, // Quantity
+      { content: product.countries?.toLowerCase() || '', weight: 2 } // Countries least important
+    ];
+    
+    keywords.forEach(keyword => {
+      let keywordScore = 0;
+      let keywordMaxScore = 0;
+      
+      fields.forEach(field => {
+        if (!field.content) return;
+        
+        keywordMaxScore += field.weight;
+        
+        // Exact match in field (highest score)
+        if (field.content === keyword) {
+          keywordScore += field.weight * 1.0;
+        }
+        // Field starts with keyword (very high score)
+        else if (field.content.startsWith(keyword)) {
+          keywordScore += field.weight * 0.9;
+        }
+        // Field contains keyword as whole word (high score)
+        else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+          keywordScore += field.weight * 0.8;
+        }
+        // Field contains keyword as substring (medium score)
+        else if (field.content.includes(keyword)) {
+          keywordScore += field.weight * 0.6;
+        }
+        // Fuzzy match - keyword contains part of field words or vice versa (low score)
+        else {
+          const fieldWords = field.content.split(/\s+/).filter(word => word.length > 2);
+          const fuzzyMatch = fieldWords.some(word => {
+            // Check if keyword and word share significant overlap
+            if (keyword.length >= 3 && word.length >= 3) {
+              return keyword.includes(word.slice(0, Math.min(3, word.length))) ||
+                     word.includes(keyword.slice(0, Math.min(3, keyword.length))) ||
+                     keyword.includes(word.slice(-3)) ||
+                     word.includes(keyword.slice(-3));
+            }
+            return false;
+          });
+          
+          if (fuzzyMatch) {
+            keywordScore += field.weight * 0.3;
+          }
+        }
+      });
+      
+      totalScore += keywordScore;
+      maxPossibleScore += keywordMaxScore;
+    });
+    
+    // Calculate confidence percentage
+    const confidence = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+    
+    return {
+      product,
+      confidence: Math.min(confidence, 100) // Cap at 100%
+    };
+  });
+  
+  // Filter products with >50% confidence and sort by confidence descending
+  return scoredProducts
+    .filter(item => item.confidence > 50)
+    .sort((a, b) => b.confidence - a.confidence)
+    .map(item => item.product);
 }
 
 // Get total number of products

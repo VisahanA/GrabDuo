@@ -10,6 +10,7 @@ import { products, loadAllProducts, Product } from "./products";
 export default function GroceryPage() {
   const { addItem, totalItems, items, updateQuantity, removeItem } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isShoppingListModalOpen, setIsShoppingListModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [allProducts, setAllProducts] = useState<Product[]>(products);
@@ -34,18 +35,99 @@ export default function GroceryPage() {
     loadProducts();
   }, []);
 
-  // Filter products based on search query
+  // Enhanced confidence-based search function
+  const confidenceBasedSearch = (products: Product[], query: string): Product[] => {
+    if (!query.trim()) return products;
+    
+    const keywords = query.toLowerCase().trim().split(/\s+/).filter(keyword => keyword.length > 0);
+    if (keywords.length === 0) return products;
+    
+    const scoredProducts = products.map(product => {
+      let totalScore = 0;
+      let maxPossibleScore = 0;
+      
+      // Define field weights (importance)
+      const fields = [
+        { content: product.name.toLowerCase(), weight: 40 }, // Name is most important
+        { content: product.brands?.toLowerCase() || '', weight: 25 }, // Brand is second
+        { content: product.badge.toLowerCase(), weight: 20 }, // Category is third
+        { content: product.categories?.toLowerCase() || '', weight: 10 }, // Categories
+        { content: product.unitQuantity?.toLowerCase() || '', weight: 3 }, // Quantity
+        { content: product.countries?.toLowerCase() || '', weight: 2 } // Countries least important
+      ];
+      
+      keywords.forEach(keyword => {
+        let keywordScore = 0;
+        let keywordMaxScore = 0;
+        
+        fields.forEach(field => {
+          if (!field.content) return;
+          
+          keywordMaxScore += field.weight;
+          
+          // Exact match in field (highest score)
+          if (field.content === keyword) {
+            keywordScore += field.weight * 1.0;
+          }
+          // Field starts with keyword (very high score)
+          else if (field.content.startsWith(keyword)) {
+            keywordScore += field.weight * 0.9;
+          }
+          // Field contains keyword as whole word (high score)
+          else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+            keywordScore += field.weight * 0.8;
+          }
+          // Field contains keyword as substring (medium score)
+          else if (field.content.includes(keyword)) {
+            keywordScore += field.weight * 0.6;
+          }
+          // Fuzzy match - keyword contains part of field words or vice versa (low score)
+          else {
+            const fieldWords = field.content.split(/\s+/).filter(word => word.length > 2);
+                         const fuzzyMatch = fieldWords.some(word => {
+               // Check if keyword and word share significant overlap
+               if (keyword.length >= 3 && word.length >= 3) {
+                 return keyword.includes(word.slice(0, Math.min(3, word.length))) ||
+                        word.includes(keyword.slice(0, Math.min(3, keyword.length))) ||
+                        keyword.includes(word.slice(-3)) ||
+                        word.includes(keyword.slice(-3));
+               }
+               return false;
+             });
+            
+            if (fuzzyMatch) {
+              keywordScore += field.weight * 0.3;
+            }
+          }
+        });
+        
+        totalScore += keywordScore;
+        maxPossibleScore += keywordMaxScore;
+      });
+      
+      // Calculate confidence percentage
+      const confidence = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+      
+      return {
+        product,
+        confidence: Math.min(confidence, 100) // Cap at 100%
+      };
+    });
+    
+    // Filter products with >50% confidence and sort by confidence descending
+    return scoredProducts
+      .filter(item => item.confidence > 50)
+      .sort((a, b) => b.confidence - a.confidence)
+      .map(item => item.product);
+  };
+
+  // Filter products based on search query using confidence-based search
   const filteredProducts = useMemo(() => {
     if (!searchQuery.trim()) {
       return allProducts;
     }
     
-    const query = searchQuery.toLowerCase();
-    return allProducts.filter(product => 
-      product.name.toLowerCase().includes(query) ||
-      product.badge.toLowerCase().includes(query) ||
-      product.brands?.toLowerCase().includes(query)
-    );
+    return confidenceBasedSearch(allProducts, searchQuery);
   }, [searchQuery, allProducts]);
 
   // Calculate pagination based on filtered products
@@ -123,6 +205,23 @@ export default function GroceryPage() {
     } else if (currentQuantity === 1) {
       removeItem(productId);
     }
+  };
+
+  // Shopping list modal handlers
+  const handleSayIt = () => {
+    setIsShoppingListModalOpen(false);
+    // TODO: Implement voice input functionality
+    console.log("Say it functionality - Voice input");
+    // For now, redirect to wishlist page
+    window.location.href = "/wishlist";
+  };
+
+  const handleSnapIt = () => {
+    setIsShoppingListModalOpen(false);
+    // TODO: Implement camera/image capture functionality
+    console.log("Snap it functionality - Camera capture");
+    // For now, redirect to wishlist page
+    window.location.href = "/wishlist";
   };
 
   // Show loading state while products are being loaded
@@ -221,7 +320,7 @@ export default function GroceryPage() {
               </svg>
               <input
                 type="text"
-                placeholder="Search for groceries..."
+                placeholder="Search by name, brand, category, or keywords..."
                 className="w-full pl-10 pr-24 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
                 value={searchQuery}
                 onChange={handleSearchChange}
@@ -253,8 +352,8 @@ export default function GroceryPage() {
               {/* Right side icons */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
                 {/* Shopping List Icon */}
-                <Link
-                  href="/wishlist"
+                <button
+                  onClick={() => setIsShoppingListModalOpen(true)}
                   className="relative p-1 hover:bg-gray-100 rounded-md transition-colors"
                   title="Shopping List"
                 >
@@ -271,7 +370,7 @@ export default function GroceryPage() {
                       d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     />
                   </svg>
-                </Link>
+                </button>
 
                 {/* AI Sparkle Button */}
                 <button className="p-1 hover:bg-gray-100 rounded-md transition-colors">
@@ -286,6 +385,11 @@ export default function GroceryPage() {
                   </svg>
                 </button>
               </div>
+            </div>
+            
+            {/* Search Help Text */}
+            <div className="mt-2 text-xs text-gray-500">
+              💡 Smart search: "coca cola", "fruits", "nestle", "australia", "500ml" - Only shows products with &gt;50% relevance
             </div>
           </div>
         </div>
@@ -322,7 +426,10 @@ export default function GroceryPage() {
               No products found
             </h3>
             <p className="text-gray-600 mb-4">
-              No products match your search for "{searchQuery}". Try searching for something else.
+              No products with &gt;50% relevance found for "{searchQuery}". Try more specific or different keywords.
+            </p>
+            <p className="text-sm text-gray-500 mb-4">
+              💡 High-confidence search: Try "coca cola", "fruits", "nestle", "biscuits", "australia", or "500ml"
             </p>
             <button
               onClick={handleClearSearch}
@@ -450,6 +557,143 @@ export default function GroceryPage() {
 
       {/* Cart Modal */}
       <CartModal isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+
+      {/* Shopping List Modal */}
+      {isShoppingListModalOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={() => setIsShoppingListModalOpen(false)}
+        >
+          <div 
+            className="bg-white rounded-2xl p-8 mx-4 max-w-md w-full shadow-2xl animate-scale-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="text-center mb-8">
+              <div className="mb-4">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                  <svg
+                    className="w-8 h-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Create Shopping List</h2>
+              <p className="text-gray-600">Choose how you'd like to add items to your shopping list</p>
+            </div>
+
+            {/* Modal Buttons */}
+            <div className="space-y-4">
+              {/* Say It Button */}
+              <button
+                onClick={handleSayIt}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                  />
+                </svg>
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Say It</div>
+                  <div className="text-blue-100 text-sm">Use voice to add items</div>
+                </div>
+              </button>
+
+              {/* Snap It Button */}
+              <button
+                onClick={handleSnapIt}
+                className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
+              >
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+                <div className="text-left">
+                  <div className="font-semibold text-lg">Snap It</div>
+                  <div className="text-purple-100 text-sm">Take a photo of your list</div>
+                </div>
+              </button>
+
+              {/* Manual Entry Option */}
+              <button
+                onClick={() => {
+                  setIsShoppingListModalOpen(false);
+                  window.location.href = "/wishlist";
+                }}
+                className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-3 px-6 flex items-center justify-center gap-3 transition-colors"
+              >
+                <svg
+                  className="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                  />
+                </svg>
+                <span className="font-medium">Type Manually</span>
+              </button>
+            </div>
+
+            {/* Close Button */}
+            <button
+              onClick={() => setIsShoppingListModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }

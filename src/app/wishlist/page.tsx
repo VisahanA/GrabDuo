@@ -64,45 +64,107 @@ export default function WishlistPage() {
     setTimeout(() => setToast(""), 3000);
   };
 
+  // Enhanced confidence-based search function for curation
+  const enhancedCurationSearch = (products: Product[], shoppingItems: string[]): Product[] => {
+    if (shoppingItems.length === 0) return [];
+    
+    const allResults = new Map<number, { product: Product, confidence: number }>();
+    
+    shoppingItems.forEach(item => {
+      const keywords = item.toLowerCase().trim().split(/\s+/).filter(keyword => keyword.length > 0);
+      if (keywords.length === 0) return;
+      
+      products.forEach(product => {
+        let totalScore = 0;
+        let maxPossibleScore = 0;
+        
+        // Define field weights (importance)
+        const fields = [
+          { content: product.name.toLowerCase(), weight: 40 }, // Name is most important
+          { content: product.brands?.toLowerCase() || '', weight: 25 }, // Brand is second
+          { content: product.badge.toLowerCase(), weight: 20 }, // Category is third
+          { content: product.categories?.toLowerCase() || '', weight: 10 }, // Categories
+          { content: product.unitQuantity?.toLowerCase() || '', weight: 3 }, // Quantity
+          { content: product.countries?.toLowerCase() || '', weight: 2 } // Countries least important
+        ];
+        
+        keywords.forEach(keyword => {
+          let keywordScore = 0;
+          let keywordMaxScore = 0;
+          
+          fields.forEach(field => {
+            if (!field.content) return;
+            
+            keywordMaxScore += field.weight;
+            
+            // Exact match in field (highest score)
+            if (field.content === keyword) {
+              keywordScore += field.weight * 1.0;
+            }
+            // Field starts with keyword (very high score)
+            else if (field.content.startsWith(keyword)) {
+              keywordScore += field.weight * 0.9;
+            }
+            // Field contains keyword as whole word (high score)
+            else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+              keywordScore += field.weight * 0.8;
+            }
+            // Field contains keyword as substring (medium score)
+            else if (field.content.includes(keyword)) {
+              keywordScore += field.weight * 0.6;
+            }
+            // Fuzzy match - keyword contains part of field words or vice versa (low score)
+            else {
+              const fieldWords = field.content.split(/\s+/).filter(word => word.length > 2);
+              const fuzzyMatch = fieldWords.some(word => {
+                // Check if keyword and word share significant overlap
+                if (keyword.length >= 3 && word.length >= 3) {
+                  return keyword.includes(word.slice(0, Math.min(3, word.length))) ||
+                         word.includes(keyword.slice(0, Math.min(3, keyword.length))) ||
+                         keyword.includes(word.slice(-3)) ||
+                         word.includes(keyword.slice(-3));
+                }
+                return false;
+              });
+              
+              if (fuzzyMatch) {
+                keywordScore += field.weight * 0.3;
+              }
+            }
+          });
+          
+          totalScore += keywordScore;
+          maxPossibleScore += keywordMaxScore;
+        });
+        
+        // Calculate confidence percentage
+        const confidence = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+        
+        // Only consider products with >50% confidence
+        if (confidence > 50) {
+          const existing = allResults.get(product.id);
+          if (!existing || confidence > existing.confidence) {
+            allResults.set(product.id, { product, confidence });
+          }
+        }
+      });
+    });
+    
+    // Return products sorted by confidence descending
+    return Array.from(allResults.values())
+      .sort((a, b) => b.confidence - a.confidence)
+      .map(item => item.product);
+  };
+
   const handleCurateShoppingList = () => {
     if (shoppingList.length === 0) {
       showToast("Please add items to your shopping list first!");
       return;
     }
 
-    // Match shopping list items with products using the full product catalog
-    const matchedProducts = allProducts.filter(product => {
-      return shoppingList.some(item => {
-        // Check if any shopping list item matches product name (case insensitive)
-        return product.name.toLowerCase().includes(item.toLowerCase()) ||
-               item.toLowerCase().includes(product.name.toLowerCase().split(' ')[0]) ||
-               product.badge.toLowerCase().includes(item.toLowerCase()) ||
-               item.toLowerCase().includes(product.badge.toLowerCase()) ||
-               (product.brands && product.brands.toLowerCase().includes(item.toLowerCase())) ||
-               (product.categories && product.categories.toLowerCase().includes(item.toLowerCase()));
-      });
-    });
-
-    // If no direct matches, try broader category matching
-    if (matchedProducts.length === 0) {
-      const categoryMatches = allProducts.filter(product => {
-        return shoppingList.some(item => {
-          const itemWords = item.toLowerCase().split(' ');
-          const productWords = product.name.toLowerCase().split(' ');
-          
-          // Check if any word from shopping list matches any word from product
-          return itemWords.some(itemWord => 
-            productWords.some(productWord => 
-              productWord.includes(itemWord) || itemWord.includes(productWord)
-            )
-          );
-        });
-      });
-      setCuratedProducts(categoryMatches.slice(0, 20)); // Show more results since we have more products
-    } else {
-      setCuratedProducts(matchedProducts.slice(0, 20)); // Show more results since we have more products
-    }
-
+    // Use enhanced search for better product matching
+    const matchedProducts = enhancedCurationSearch(allProducts, shoppingList);
+    setCuratedProducts(matchedProducts.slice(0, 20)); // Show top 20 results
     setIsCurateMode(true);
   };
 

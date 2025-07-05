@@ -268,8 +268,80 @@ function getProductsByCategory(category, productList = products) {
     return productList.filter((product)=>product.badge === category);
 }
 function searchProducts(query, productList = products) {
-    const lowercaseQuery = query.toLowerCase();
-    return productList.filter((product)=>product.name.toLowerCase().includes(lowercaseQuery) || product.brands?.toLowerCase().includes(lowercaseQuery) || product.categories?.toLowerCase().includes(lowercaseQuery));
+    if (!query.trim()) return productList;
+    const keywords = query.toLowerCase().trim().split(/\s+/).filter((keyword)=>keyword.length > 0);
+    if (keywords.length === 0) return productList;
+    const scoredProducts = productList.map((product)=>{
+        let totalScore = 0;
+        let maxPossibleScore = 0;
+        // Define field weights (importance)
+        const fields = [
+            {
+                content: product.name.toLowerCase(),
+                weight: 40
+            },
+            {
+                content: product.brands?.toLowerCase() || '',
+                weight: 25
+            },
+            {
+                content: product.badge.toLowerCase(),
+                weight: 20
+            },
+            {
+                content: product.categories?.toLowerCase() || '',
+                weight: 10
+            },
+            {
+                content: product.unitQuantity?.toLowerCase() || '',
+                weight: 3
+            },
+            {
+                content: product.countries?.toLowerCase() || '',
+                weight: 2
+            } // Countries least important
+        ];
+        keywords.forEach((keyword)=>{
+            let keywordScore = 0;
+            let keywordMaxScore = 0;
+            fields.forEach((field)=>{
+                if (!field.content) return;
+                keywordMaxScore += field.weight;
+                // Exact match in field (highest score)
+                if (field.content === keyword) {
+                    keywordScore += field.weight * 1.0;
+                } else if (field.content.startsWith(keyword)) {
+                    keywordScore += field.weight * 0.9;
+                } else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+                    keywordScore += field.weight * 0.8;
+                } else if (field.content.includes(keyword)) {
+                    keywordScore += field.weight * 0.6;
+                } else {
+                    const fieldWords = field.content.split(/\s+/).filter((word)=>word.length > 2);
+                    const fuzzyMatch = fieldWords.some((word)=>{
+                        // Check if keyword and word share significant overlap
+                        if (keyword.length >= 3 && word.length >= 3) {
+                            return keyword.includes(word.slice(0, Math.min(3, word.length))) || word.includes(keyword.slice(0, Math.min(3, keyword.length))) || keyword.includes(word.slice(-3)) || word.includes(keyword.slice(-3));
+                        }
+                        return false;
+                    });
+                    if (fuzzyMatch) {
+                        keywordScore += field.weight * 0.3;
+                    }
+                }
+            });
+            totalScore += keywordScore;
+            maxPossibleScore += keywordMaxScore;
+        });
+        // Calculate confidence percentage
+        const confidence = maxPossibleScore > 0 ? totalScore / maxPossibleScore * 100 : 0;
+        return {
+            product,
+            confidence: Math.min(confidence, 100) // Cap at 100%
+        };
+    });
+    // Filter products with >50% confidence and sort by confidence descending
+    return scoredProducts.filter((item)=>item.confidence > 50).sort((a, b)=>b.confidence - a.confidence).map((item)=>item.product);
 }
 const totalProducts = products.length;
 const availableCategories = [
@@ -460,32 +532,100 @@ function WishlistPage() {
         setToast(message);
         setTimeout(()=>setToast(""), 3000);
     };
+    // Enhanced confidence-based search function for curation
+    const enhancedCurationSearch = (products, shoppingItems)=>{
+        if (shoppingItems.length === 0) return [];
+        const allResults = new Map();
+        shoppingItems.forEach((item)=>{
+            const keywords = item.toLowerCase().trim().split(/\s+/).filter((keyword)=>keyword.length > 0);
+            if (keywords.length === 0) return;
+            products.forEach((product)=>{
+                let totalScore = 0;
+                let maxPossibleScore = 0;
+                // Define field weights (importance)
+                const fields = [
+                    {
+                        content: product.name.toLowerCase(),
+                        weight: 40
+                    },
+                    {
+                        content: product.brands?.toLowerCase() || '',
+                        weight: 25
+                    },
+                    {
+                        content: product.badge.toLowerCase(),
+                        weight: 20
+                    },
+                    {
+                        content: product.categories?.toLowerCase() || '',
+                        weight: 10
+                    },
+                    {
+                        content: product.unitQuantity?.toLowerCase() || '',
+                        weight: 3
+                    },
+                    {
+                        content: product.countries?.toLowerCase() || '',
+                        weight: 2
+                    } // Countries least important
+                ];
+                keywords.forEach((keyword)=>{
+                    let keywordScore = 0;
+                    let keywordMaxScore = 0;
+                    fields.forEach((field)=>{
+                        if (!field.content) return;
+                        keywordMaxScore += field.weight;
+                        // Exact match in field (highest score)
+                        if (field.content === keyword) {
+                            keywordScore += field.weight * 1.0;
+                        } else if (field.content.startsWith(keyword)) {
+                            keywordScore += field.weight * 0.9;
+                        } else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+                            keywordScore += field.weight * 0.8;
+                        } else if (field.content.includes(keyword)) {
+                            keywordScore += field.weight * 0.6;
+                        } else {
+                            const fieldWords = field.content.split(/\s+/).filter((word)=>word.length > 2);
+                            const fuzzyMatch = fieldWords.some((word)=>{
+                                // Check if keyword and word share significant overlap
+                                if (keyword.length >= 3 && word.length >= 3) {
+                                    return keyword.includes(word.slice(0, Math.min(3, word.length))) || word.includes(keyword.slice(0, Math.min(3, keyword.length))) || keyword.includes(word.slice(-3)) || word.includes(keyword.slice(-3));
+                                }
+                                return false;
+                            });
+                            if (fuzzyMatch) {
+                                keywordScore += field.weight * 0.3;
+                            }
+                        }
+                    });
+                    totalScore += keywordScore;
+                    maxPossibleScore += keywordMaxScore;
+                });
+                // Calculate confidence percentage
+                const confidence = maxPossibleScore > 0 ? totalScore / maxPossibleScore * 100 : 0;
+                // Only consider products with >50% confidence
+                if (confidence > 50) {
+                    const existing = allResults.get(product.id);
+                    if (!existing || confidence > existing.confidence) {
+                        allResults.set(product.id, {
+                            product,
+                            confidence
+                        });
+                    }
+                }
+            });
+        });
+        // Return products sorted by confidence descending
+        return Array.from(allResults.values()).sort((a, b)=>b.confidence - a.confidence).map((item)=>item.product);
+    };
     const handleCurateShoppingList = ()=>{
         if (shoppingList.length === 0) {
             showToast("Please add items to your shopping list first!");
             return;
         }
-        // Match shopping list items with products using the full product catalog
-        const matchedProducts = allProducts.filter((product)=>{
-            return shoppingList.some((item)=>{
-                // Check if any shopping list item matches product name (case insensitive)
-                return product.name.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(product.name.toLowerCase().split(' ')[0]) || product.badge.toLowerCase().includes(item.toLowerCase()) || item.toLowerCase().includes(product.badge.toLowerCase()) || product.brands && product.brands.toLowerCase().includes(item.toLowerCase()) || product.categories && product.categories.toLowerCase().includes(item.toLowerCase());
-            });
-        });
-        // If no direct matches, try broader category matching
-        if (matchedProducts.length === 0) {
-            const categoryMatches = allProducts.filter((product)=>{
-                return shoppingList.some((item)=>{
-                    const itemWords = item.toLowerCase().split(' ');
-                    const productWords = product.name.toLowerCase().split(' ');
-                    // Check if any word from shopping list matches any word from product
-                    return itemWords.some((itemWord)=>productWords.some((productWord)=>productWord.includes(itemWord) || itemWord.includes(productWord)));
-                });
-            });
-            setCuratedProducts(categoryMatches.slice(0, 20)); // Show more results since we have more products
-        } else {
-            setCuratedProducts(matchedProducts.slice(0, 20)); // Show more results since we have more products
-        }
+        // Use enhanced search for better product matching
+        const matchedProducts = enhancedCurationSearch(allProducts, shoppingList);
+        setCuratedProducts(matchedProducts.slice(0, 20)); // Show top 20 results
         setIsCurateMode(true);
     };
     const handleBackToList = ()=>{
@@ -535,12 +675,12 @@ function WishlistPage() {
                                 clipRule: "evenodd"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 149,
+                                lineNumber: 211,
                                 columnNumber: 15
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 148,
+                            lineNumber: 210,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -548,18 +688,18 @@ function WishlistPage() {
                             children: toast
                         }, void 0, false, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 151,
+                            lineNumber: 213,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/wishlist/page.tsx",
-                    lineNumber: 147,
+                    lineNumber: 209,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/wishlist/page.tsx",
-                lineNumber: 146,
+                lineNumber: 208,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -582,17 +722,17 @@ function WishlistPage() {
                                     d: "M15 19l-7-7 7-7"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 169,
+                                    lineNumber: 231,
                                     columnNumber: 15
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 163,
+                                lineNumber: 225,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 159,
+                            lineNumber: 221,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h1", {
@@ -600,18 +740,18 @@ function WishlistPage() {
                             children: isCurateMode ? "Curated Products" : "Shopping List"
                         }, void 0, false, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 177,
+                            lineNumber: 239,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/src/app/wishlist/page.tsx",
-                    lineNumber: 158,
+                    lineNumber: 220,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/src/app/wishlist/page.tsx",
-                lineNumber: 157,
+                lineNumber: 219,
                 columnNumber: 7
             }, this),
             !isCurateMode ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -633,12 +773,12 @@ function WishlistPage() {
                                         d: "M12 6v6m0 0v6m0-6h6m-6 0H6"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 195,
+                                        lineNumber: 257,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 189,
+                                    lineNumber: 251,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -650,7 +790,7 @@ function WishlistPage() {
                                     className: `w-full ${shoppingList.length > 0 ? 'pl-10' : 'pl-4'} pr-24 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent text-gray-900 placeholder-gray-500`
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 203,
+                                    lineNumber: 265,
                                     columnNumber: 15
                                 }, this),
                                 newItemInput && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -669,17 +809,17 @@ function WishlistPage() {
                                             d: "M6 18L18 6M6 6l12 12"
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 223,
+                                            lineNumber: 285,
                                             columnNumber: 21
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 217,
+                                        lineNumber: 279,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 212,
+                                    lineNumber: 274,
                                     columnNumber: 17
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -688,18 +828,18 @@ function WishlistPage() {
                                     children: "Add"
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 232,
+                                    lineNumber: 294,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 187,
+                            lineNumber: 249,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 186,
+                        lineNumber: 248,
                         columnNumber: 11
                     }, this),
                     shoppingList.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -714,7 +854,7 @@ function WishlistPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 244,
+                                lineNumber: 306,
                                 columnNumber: 15
                             }, this),
                             shoppingList.map((item, index)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -727,7 +867,7 @@ function WishlistPage() {
                                                     className: "w-2 h-2 bg-green-500 rounded-full"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 253,
+                                                    lineNumber: 315,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -735,13 +875,13 @@ function WishlistPage() {
                                                     children: item
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 254,
+                                                    lineNumber: 316,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 252,
+                                            lineNumber: 314,
                                             columnNumber: 19
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -760,29 +900,29 @@ function WishlistPage() {
                                                     d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1H8a1 1 0 00-1 1v3M4 7h16"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 267,
+                                                    lineNumber: 329,
                                                     columnNumber: 23
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                lineNumber: 261,
+                                                lineNumber: 323,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 256,
+                                            lineNumber: 318,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, index, true, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 248,
+                                    lineNumber: 310,
                                     columnNumber: 17
                                 }, this))
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 243,
+                        lineNumber: 305,
                         columnNumber: 13
                     }, this) : /* Empty State */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "text-center py-16",
@@ -801,17 +941,17 @@ function WishlistPage() {
                                         d: "M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 288,
+                                        lineNumber: 350,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 282,
+                                    lineNumber: 344,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 281,
+                                lineNumber: 343,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -819,7 +959,7 @@ function WishlistPage() {
                                 children: "Your shopping list is empty"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 296,
+                                lineNumber: 358,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -827,13 +967,13 @@ function WishlistPage() {
                                 children: "Start adding items using the input box above to keep track of what you need."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 299,
+                                lineNumber: 361,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 280,
+                        lineNumber: 342,
                         columnNumber: 13
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -859,7 +999,7 @@ function WishlistPage() {
                                                     fill: "none"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 319,
+                                                    lineNumber: 381,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("path", {
@@ -868,13 +1008,13 @@ function WishlistPage() {
                                                     d: "M4 12a8 8 0 018-8v8H4z"
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 328,
+                                                    lineNumber: 390,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 318,
+                                            lineNumber: 380,
                                             columnNumber: 19
                                         }, this),
                                         "Loading Products..."
@@ -893,12 +1033,12 @@ function WishlistPage() {
                                                 d: "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                lineNumber: 344,
+                                                lineNumber: 406,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 338,
+                                            lineNumber: 400,
                                             columnNumber: 19
                                         }, this),
                                         "Curate Shopping List"
@@ -906,7 +1046,7 @@ function WishlistPage() {
                                 }, void 0, true)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 307,
+                                lineNumber: 369,
                                 columnNumber: 13
                             }, this),
                             !isLoadingProducts && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -918,13 +1058,13 @@ function WishlistPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 358,
+                                lineNumber: 420,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 306,
+                        lineNumber: 368,
                         columnNumber: 11
                     }, this)
                 ]
@@ -948,24 +1088,24 @@ function WishlistPage() {
                                         d: "M15 19l-7-7 7-7"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 379,
+                                        lineNumber: 441,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 373,
+                                    lineNumber: 435,
                                     columnNumber: 15
                                 }, this),
                                 "Back to Shopping List"
                             ]
                         }, void 0, true, {
                             fileName: "[project]/src/app/wishlist/page.tsx",
-                            lineNumber: 369,
+                            lineNumber: 431,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 368,
+                        lineNumber: 430,
                         columnNumber: 11
                     }, this),
                     curatedProducts.length > 0 ? /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -979,7 +1119,7 @@ function WishlistPage() {
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 393,
+                                lineNumber: 455,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -987,7 +1127,7 @@ function WishlistPage() {
                                 children: "Based on your shopping list, we found these matching products:"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 396,
+                                lineNumber: 458,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1004,12 +1144,12 @@ function WishlistPage() {
                                                         children: product.icon
                                                     }, void 0, false, {
                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                        lineNumber: 410,
+                                                        lineNumber: 472,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 407,
+                                                    lineNumber: 469,
                                                     columnNumber: 23
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1024,7 +1164,7 @@ function WishlistPage() {
                                                                         children: product.name
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                        lineNumber: 419,
+                                                                        lineNumber: 481,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1032,13 +1172,13 @@ function WishlistPage() {
                                                                         children: product.badge
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                        lineNumber: 422,
+                                                                        lineNumber: 484,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                lineNumber: 418,
+                                                                lineNumber: 480,
                                                                 columnNumber: 27
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1048,23 +1188,23 @@ function WishlistPage() {
                                                                     children: product.price
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                    lineNumber: 429,
+                                                                    lineNumber: 491,
                                                                     columnNumber: 29
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                lineNumber: 428,
+                                                                lineNumber: 490,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                        lineNumber: 417,
+                                                        lineNumber: 479,
                                                         columnNumber: 25
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                    lineNumber: 416,
+                                                    lineNumber: 478,
                                                     columnNumber: 23
                                                 }, this),
                                                 (()=>{
@@ -1088,12 +1228,12 @@ function WishlistPage() {
                                                                         d: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                        lineNumber: 454,
+                                                                        lineNumber: 516,
                                                                         columnNumber: 33
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                    lineNumber: 448,
+                                                                    lineNumber: 510,
                                                                     columnNumber: 31
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1101,13 +1241,13 @@ function WishlistPage() {
                                                                     children: "Add"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                    lineNumber: 461,
+                                                                    lineNumber: 523,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                                            lineNumber: 443,
+                                                            lineNumber: 505,
                                                             columnNumber: 29
                                                         }, this);
                                                     }
@@ -1130,17 +1270,17 @@ function WishlistPage() {
                                                                         d: "M20 12H4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                        lineNumber: 479,
+                                                                        lineNumber: 541,
                                                                         columnNumber: 33
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                    lineNumber: 473,
+                                                                    lineNumber: 535,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                lineNumber: 468,
+                                                                lineNumber: 530,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -1148,7 +1288,7 @@ function WishlistPage() {
                                                                 children: quantity
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                lineNumber: 487,
+                                                                lineNumber: 549,
                                                                 columnNumber: 29
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -1167,40 +1307,40 @@ function WishlistPage() {
                                                                         d: "M12 4v16m8-8H4"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                        lineNumber: 501,
+                                                                        lineNumber: 563,
                                                                         columnNumber: 33
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                    lineNumber: 495,
+                                                                    lineNumber: 557,
                                                                     columnNumber: 31
                                                                 }, this)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                                lineNumber: 490,
+                                                                lineNumber: 552,
                                                                 columnNumber: 29
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                                        lineNumber: 467,
+                                                        lineNumber: 529,
                                                         columnNumber: 27
                                                     }, this);
                                                 })()
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 405,
+                                            lineNumber: 467,
                                             columnNumber: 21
                                         }, this)
                                     }, product.id, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 401,
+                                        lineNumber: 463,
                                         columnNumber: 19
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 399,
+                                lineNumber: 461,
                                 columnNumber: 15
                             }, this),
                             items.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1221,12 +1361,12 @@ function WishlistPage() {
                                                 d: "M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
                                             }, void 0, false, {
                                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                                lineNumber: 530,
+                                                lineNumber: 592,
                                                 columnNumber: 25
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 524,
+                                            lineNumber: 586,
                                             columnNumber: 23
                                         }, this),
                                         "Go to Cart",
@@ -1235,24 +1375,24 @@ function WishlistPage() {
                                             children: items.reduce((total, item)=>total + item.quantity, 0)
                                         }, void 0, false, {
                                             fileName: "[project]/src/app/wishlist/page.tsx",
-                                            lineNumber: 539,
+                                            lineNumber: 601,
                                             columnNumber: 25
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 520,
+                                    lineNumber: 582,
                                     columnNumber: 21
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 519,
+                                lineNumber: 581,
                                 columnNumber: 19
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 392,
+                        lineNumber: 454,
                         columnNumber: 13
                     }, this) : /* No Matches Found */ /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "text-center py-16",
@@ -1271,17 +1411,17 @@ function WishlistPage() {
                                         d: "M9.172 16.172a4 4 0 015.656 0M9 12h6m-3-3v6m-9 1V7a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 557,
+                                        lineNumber: 619,
                                         columnNumber: 19
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/src/app/wishlist/page.tsx",
-                                    lineNumber: 551,
+                                    lineNumber: 613,
                                     columnNumber: 17
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 550,
+                                lineNumber: 612,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("h3", {
@@ -1289,7 +1429,7 @@ function WishlistPage() {
                                 children: "No matching products found"
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 565,
+                                lineNumber: 627,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -1297,7 +1437,7 @@ function WishlistPage() {
                                 children: "We couldn't find products matching your shopping list items. Try browsing our catalog or modify your shopping list."
                             }, void 0, false, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 568,
+                                lineNumber: 630,
                                 columnNumber: 15
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -1309,7 +1449,7 @@ function WishlistPage() {
                                         children: "Back to Shopping List"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 572,
+                                        lineNumber: 634,
                                         columnNumber: 17
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$server$2f$route$2d$modules$2f$app$2d$page$2f$vendored$2f$ssr$2f$react$2d$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$next$2f$dist$2f$client$2f$app$2d$dir$2f$link$2e$js__$5b$app$2d$ssr$5d$__$28$ecmascript$29$__["default"], {
@@ -1318,31 +1458,31 @@ function WishlistPage() {
                                         children: "Browse Products"
                                     }, void 0, false, {
                                         fileName: "[project]/src/app/wishlist/page.tsx",
-                                        lineNumber: 578,
+                                        lineNumber: 640,
                                         columnNumber: 17
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/src/app/wishlist/page.tsx",
-                                lineNumber: 571,
+                                lineNumber: 633,
                                 columnNumber: 15
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/src/app/wishlist/page.tsx",
-                        lineNumber: 549,
+                        lineNumber: 611,
                         columnNumber: 13
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/src/app/wishlist/page.tsx",
-                lineNumber: 366,
+                lineNumber: 428,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/src/app/wishlist/page.tsx",
-        lineNumber: 143,
+        lineNumber: 205,
         columnNumber: 5
     }, this);
 }
