@@ -37,33 +37,37 @@ export default function WishlistPage() {
 
   // Check if navigated from OCR and load OCR data
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const isFromOcr = urlParams.get('from') === 'ocr';
-    
-    if (isFromOcr) {
-      setFromOcr(true);
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFromOcr = urlParams.get('from') === 'ocr' || urlParams.get('from') === 'stt';
       
-      // Load OCR shopping items
-      const ocrItemsJson = localStorage.getItem('ocrShoppingItems');
-      if (ocrItemsJson) {
-        try {
-          const ocrItems: string[] = JSON.parse(ocrItemsJson);
-          setShoppingList(ocrItems);
+      if (isFromOcr) {
+        setFromOcr(true);
+        
+        // Load OCR shopping items
+        if (typeof Storage !== 'undefined') {
+          const ocrItemsJson = localStorage.getItem('ocrShoppingItems');
+          if (ocrItemsJson) {
+            try {
+              const ocrItems: string[] = JSON.parse(ocrItemsJson);
+              setShoppingList(ocrItems);
+              
+              // Clear the localStorage data after loading
+              localStorage.removeItem('ocrShoppingItems');
+              
+              // Show success message
+              setTimeout(() => {
+                showToast(`✅ Added ${ocrItems.length} items from your ${urlParams.get('from') === 'stt' ? 'voice' : 'image'} to the shopping list!`);
+              }, 500);
+            } catch (error) {
+              console.error('Failed to parse OCR items:', error);
+            }
+          }
           
-          // Clear the localStorage data after loading
-          localStorage.removeItem('ocrShoppingItems');
-          
-          // Show success message
-          setTimeout(() => {
-            showToast(`✅ Added ${ocrItems.length} items from your image to the shopping list!`);
-          }, 500);
-        } catch (error) {
-          console.error('Failed to parse OCR items:', error);
+          // Clear the original OCR text from localStorage
+          localStorage.removeItem('ocrOriginalText');
         }
       }
-      
-      // Clear the original OCR text from localStorage
-      localStorage.removeItem('ocrOriginalText');
     }
   }, []);
 

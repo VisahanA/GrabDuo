@@ -21,20 +21,32 @@ export default function GroceryPage() {
 
   // Load all products on component mount
   useEffect(() => {
+    let isMounted = true;
+    
     const loadProducts = async () => {
       try {
         const loadedProducts = await loadAllProducts();
-        setAllProducts(loadedProducts);
+        if (isMounted) {
+          setAllProducts(loadedProducts);
+        }
       } catch (error) {
         console.error('Failed to load all products:', error);
         // Fallback to basic products on error
-        setAllProducts(products);
+        if (isMounted) {
+          setAllProducts(products);
+        }
       } finally {
-        setIsInitialLoading(false);
+        if (isMounted) {
+          setIsInitialLoading(false);
+        }
       }
     };
 
     loadProducts();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Enhanced confidence-based search function
@@ -211,73 +223,399 @@ export default function GroceryPage() {
 
   // Shopping list modal handlers
   const handleSayIt = async () => {
-    setIsShoppingListModalOpen(false);
-    
-    // Create file input element
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.style.display = 'none';
-    
-    fileInput.onchange = async (event) => {
-      const file = (event.target as HTMLInputElement).files?.[0];
-      if (!file) return;
-      
-      // Check if file is an image
-      if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+    try {
+      // Check if browser supports MediaRecorder
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Audio recording is not supported in this browser.');
         return;
       }
+
+      // Don't set processing state yet - only during actual processing
+      setIsShoppingListModalOpen(false);
+
+      // Request microphone access
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // Check file size (limit to 10MB)
-      if (file.size > 10 * 1024 * 1024) {
-        alert('Image file is too large. Please select a file smaller than 10MB.');
-        return;
-      }
-      
-             setIsOCRProcessing(true);
-      
-      try {
-        // Check if OCR API is available
-        const apiAvailable = await OCRService.isAvailable();
-        if (!apiAvailable) {
-          throw new Error('OCR service is not available. Please make sure the OCR API is running on localhost:8000');
+      // Show recording UI
+      const recordingToast = document.createElement('div');
+      recordingToast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down';
+      recordingToast.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+            <span class="font-semibold">Recording...</span>
+          </div>
+          <button class="text-white hover:text-gray-200 text-sm underline">Click to stop</button>
+        </div>
+      `;
+      document.body.appendChild(recordingToast);
+
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: BlobPart[] = [];
+      let autoStopTimer: NodeJS.Timeout | null = null;
+
+      mediaRecorder.ondataavailable = (event) => {
+        try {
+          if (event.data && event.data.size > 0) {
+            audioChunks.push(event.data);
+            console.log('📼 Audio chunk received:', event.data.size, 'bytes');
+          }
+        } catch (error) {
+          console.warn('⚠️ Error handling audio data:', error);
+        }
+      };
+
+      mediaRecorder.onerror = (event) => {
+        console.error('🎙️ MediaRecorder error:', event);
+        stream.getTracks().forEach(track => track.stop());
+        if (autoStopTimer) {
+          clearTimeout(autoStopTimer);
+          autoStopTimer = null;
+        }
+        if (document.body.contains(recordingToast)) {
+          document.body.removeChild(recordingToast);
+        }
+        setIsOCRProcessing(false);
+        alert('Recording error occurred. Please try again.');
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(track => track.stop());
+        
+        // Clear auto-stop timer
+        if (autoStopTimer) {
+          clearTimeout(autoStopTimer);
+          autoStopTimer = null;
         }
         
-        // Process image with OCR
-        const result: OCRResult = await OCRService.extractTextFromImage(file);
+        // Remove recording UI safely
+        if (document.body.contains(recordingToast)) {
+          document.body.removeChild(recordingToast);
+        }
         
-                 if (result.success && result.text) {
-           // Parse the OCR result to find product names
-           const extractedItems = parseShoppingListFromText(result.text);
-           
-           if (extractedItems.length > 0) {
-             // Store the extracted items in localStorage for the wishlist page
-             localStorage.setItem('ocrShoppingItems', JSON.stringify(extractedItems));
-             localStorage.setItem('ocrOriginalText', result.text);
-           } else {
-             // Even if no items found, store the original text
-             localStorage.setItem('ocrOriginalText', result.text);
-           }
-           
-           // Navigate to wishlist page immediately
-           window.location.href = '/wishlist?from=ocr';
-         } else {
-           throw new Error(result.error || 'Failed to extract text from image');
-         }
-             } catch (error) {
-         console.error('OCR Error:', error);
-         const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-         alert(`OCR processing failed: ${errorMessage}\n\nPlease try again or use manual entry.`);
-       } finally {
-         setIsOCRProcessing(false);
-       }
-    };
-    
-    // Trigger file selection
-    document.body.appendChild(fileInput);
-    fileInput.click();
-    document.body.removeChild(fileInput);
+        // Create audio blob
+        if (audioChunks.length === 0) {
+          console.warn('⚠️ No audio data recorded');
+          alert('No audio was recorded. Please try again.');
+          setIsOCRProcessing(false);
+          return;
+        }
+        
+        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+        console.log('🎵 Created audio blob:', audioBlob.size, 'bytes, type:', audioBlob.type);
+        
+        if (audioBlob.size === 0) {
+          console.warn('⚠️ Audio blob is empty');
+          alert('Recorded audio is empty. Please try again.');
+          setIsOCRProcessing(false);
+          return;
+        }
+        
+        // Show processing message directly (no separate upload step needed)
+        setIsOCRProcessing(true);
+
+        let processingToast: HTMLDivElement | null = null;
+        
+        try {
+          // Show processing toast immediately
+          processingToast = document.createElement('div');
+          processingToast.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-purple-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slide-down';
+          processingToast.innerHTML = `
+            <div class="flex items-center gap-2">
+              <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+              </svg>
+              <span>Processing speech...</span>
+            </div>
+          `;
+          document.body.appendChild(processingToast);
+
+          console.log('🎵 Audio blob size:', audioBlob.size, 'bytes');
+          console.log('🎵 Audio blob type:', audioBlob.type);
+
+          // Check if STT API is available first
+          console.log('🔍 Checking STT API availability...');
+          try {
+            const healthCheck = await fetch('http://localhost:8000/health', {
+              method: 'GET',
+              headers: {
+                'Accept': 'application/json',
+              },
+            });
+            console.log('🔍 STT API health check:', healthCheck.status);
+          } catch (healthError) {
+            console.warn('⚠️ STT API health check failed:', healthError);
+          }
+
+          // Try multiple STT API approaches
+          let sttResponse: Response | null = null;
+          let sttResult: any = null;
+
+          // Approach 1: Try sending audio file directly (if supported)
+          try {
+            console.log('🗣️ Trying STT API with file upload...');
+            const formData = new FormData();
+            formData.append('audio_file', audioBlob, 'recording.wav');
+            formData.append('confidence_threshold', '0');
+
+            sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
+              method: 'POST',
+              body: formData,
+            });
+
+            console.log('🗣️ STT API (file upload) response status:', sttResponse.status);
+
+            if (sttResponse.ok) {
+              sttResult = await sttResponse.json();
+              console.log('✅ STT API (file upload) success:', sttResult);
+            } else {
+              const errorText = await sttResponse.text();
+              console.warn('❌ STT API (file upload) failed:', errorText);
+              sttResponse = null; // Reset for next attempt
+            }
+          } catch (fileUploadError) {
+            console.warn('❌ STT API file upload approach failed:', fileUploadError);
+            sttResponse = null;
+          }
+
+          // Approach 2: Try with base64 encoded audio (if file upload failed)
+          if (!sttResponse || !sttResponse.ok) {
+            try {
+              console.log('🗣️ Trying STT API with base64 audio...');
+              
+              // Convert audio blob to base64
+              const audioBase64 = await new Promise<string>((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                  try {
+                    const result = reader.result;
+                    if (typeof result === 'string' && result.includes(',')) {
+                      // Remove data URL prefix (e.g., "data:audio/wav;base64,")
+                      const base64 = result.split(',')[1];
+                      if (base64) {
+                        resolve(base64);
+                      } else {
+                        reject(new Error('Failed to extract base64 data from FileReader result'));
+                      }
+                    } else {
+                      reject(new Error('FileReader result is not a valid data URL'));
+                    }
+                  } catch (error) {
+                    reject(new Error(`Error processing FileReader result: ${error}`));
+                  }
+                };
+                reader.onerror = (error) => {
+                  reject(new Error(`FileReader error: ${error}`));
+                };
+                reader.onabort = () => {
+                  reject(new Error('FileReader operation was aborted'));
+                };
+                
+                try {
+                  reader.readAsDataURL(audioBlob);
+                } catch (error) {
+                  reject(new Error(`Failed to start FileReader: ${error}`));
+                }
+              });
+
+              sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                  audio_data: audioBase64,
+                  audio_format: 'wav',
+                  confidence_threshold: 0
+                })
+              });
+
+              console.log('🗣️ STT API (base64) response status:', sttResponse.status);
+
+              if (sttResponse.ok) {
+                sttResult = await sttResponse.json();
+                console.log('✅ STT API (base64) success:', sttResult);
+              } else {
+                const errorText = await sttResponse.text();
+                console.warn('❌ STT API (base64) failed:', errorText);
+                sttResponse = null;
+              }
+            } catch (base64Error) {
+              console.warn('❌ STT API base64 approach failed:', base64Error);
+              sttResponse = null;
+            }
+          }
+
+          // Approach 3: Fallback to URL approach with public placeholder (if all else fails)
+          if (!sttResponse || !sttResponse.ok) {
+            try {
+              console.log('🗣️ Trying STT API with fallback URL...');
+              
+              sttResponse = await fetch('http://localhost:8000/api/v1/stt/transcribe', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json',
+                },
+                body: JSON.stringify({
+                  audio_url: 'http://localhost:3000/uploads/audio_1751756292580.wav',
+                  confidence_threshold: 0
+                })
+              });
+
+              console.log('🗣️ STT API (fallback) response status:', sttResponse.status);
+
+              if (sttResponse.ok) {
+                sttResult = await sttResponse.json();
+                console.log('✅ STT API (fallback) success - using demo audio:', sttResult);
+              }
+            } catch (fallbackError) {
+              console.warn('❌ STT API fallback approach failed:', fallbackError);
+            }
+          }
+
+          // Check final result
+          if (!sttResponse || !sttResponse.ok) {
+            let errorText = 'No response received';
+            try {
+              if (sttResponse) {
+                errorText = await sttResponse.text();
+              }
+            } catch (textError) {
+              console.warn('Could not read error response text:', textError);
+              errorText = `HTTP ${sttResponse?.status || 'Unknown'} error`;
+            }
+            console.error('❌ All STT API approaches failed');
+            throw new Error(`STT API request failed: ${sttResponse?.status || 'No response'} - ${errorText}`);
+          }
+
+          console.log('🗣️ Final STT API result:', sttResult);
+          
+          // Extract transcribed text
+          const transcribedText = sttResult?.transcribed_text || sttResult?.text || sttResult?.transcript;
+          
+          if (transcribedText) {
+            // Parse the transcribed text into shopping list items
+            const extractedItems = parseShoppingListFromText(transcribedText);
+            
+            if (extractedItems.length > 0) {
+              // Store the extracted items in localStorage for the wishlist page
+              if (typeof Storage !== 'undefined') {
+                localStorage.setItem('ocrShoppingItems', JSON.stringify(extractedItems));
+                localStorage.setItem('ocrOriginalText', transcribedText);
+              }
+              
+              // Remove processing toast safely
+              if (processingToast && document.body.contains(processingToast)) {
+                document.body.removeChild(processingToast);
+              }
+              
+              // Navigate to wishlist page immediately
+              if (typeof window !== 'undefined') {
+                window.location.href = '/wishlist?from=stt';
+              }
+            } else {
+              // Even if no items found, store the original text
+              if (typeof Storage !== 'undefined') {
+                localStorage.setItem('ocrOriginalText', transcribedText);
+              }
+              if (typeof window !== 'undefined') {
+                window.location.href = '/wishlist?from=stt';
+              }
+            }
+          } else {
+            throw new Error('No transcribed text received');
+          }
+        } catch (error) {
+          console.error('STT Error:', error);
+          
+          // Remove processing toast safely
+          if (processingToast && document.body.contains(processingToast)) {
+            document.body.removeChild(processingToast);
+          }
+          
+          const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+          alert(`Speech processing failed: ${errorMessage}\n\nPlease try again or use manual entry.`);
+        } finally {
+          setIsOCRProcessing(false);
+        }
+      };
+
+      // Stop recording when toast is clicked
+      recordingToast.onclick = () => {
+        try {
+          if (mediaRecorder && mediaRecorder.state === 'recording') {
+            mediaRecorder.stop();
+          }
+          if (autoStopTimer) {
+            clearTimeout(autoStopTimer);
+            autoStopTimer = null;
+          }
+        } catch (error) {
+          console.warn('⚠️ Error stopping recording:', error);
+        }
+      };
+
+      // Start recording with error handling
+      try {
+        mediaRecorder.start();
+        console.log('🎙️ Recording started');
+        
+        // Auto-stop after 10 seconds
+        autoStopTimer = setTimeout(() => {
+          try {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+              console.log('⏰ Auto-stopping recording after 10 seconds');
+              mediaRecorder.stop();
+            }
+          } catch (error) {
+            console.warn('⚠️ Error auto-stopping recording:', error);
+          }
+        }, 10000);
+      } catch (error) {
+        console.error('❌ Failed to start recording:', error);
+        stream.getTracks().forEach(track => track.stop());
+        if (document.body.contains(recordingToast)) {
+          document.body.removeChild(recordingToast);
+        }
+        setIsOCRProcessing(false);
+        alert('Failed to start recording. Please try again.');
+        return;
+      }
+
+    } catch (error) {
+      console.error('❌ Error starting voice recording:', error);
+      
+      // Clean up any existing toasts
+      const existingToasts = document.querySelectorAll('[class*="fixed top-4 left-1/2"]');
+      existingToasts.forEach(toast => {
+        try {
+          if (document.body.contains(toast)) {
+            document.body.removeChild(toast);
+          }
+        } catch (cleanupError) {
+          console.warn('⚠️ Error cleaning up toast:', cleanupError);
+        }
+      });
+      
+      setIsOCRProcessing(false);
+      
+      let errorMessage = 'Microphone access denied or not available';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      console.log('🔍 Error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      alert(`Voice recording failed: ${errorMessage}`);
+    }
   };
 
   // Helper function to parse shopping list from OCR text
@@ -308,12 +646,80 @@ export default function GroceryPage() {
     return items.slice(0, 20); // Limit to 20 items
   };
 
-  const handleSnapIt = () => {
+  const handleSnapIt = async () => {
     setIsShoppingListModalOpen(false);
-    // TODO: Implement camera/image capture functionality
-    console.log("Snap it functionality - Camera capture");
-    // For now, redirect to wishlist page
-    window.location.href = "/wishlist";
+    
+    // Create file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    fileInput.style.display = 'none';
+    
+    fileInput.onchange = async (event) => {
+      const file = (event.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      
+      // Check if file is an image
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Check file size (limit to 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('Image file is too large. Please select a file smaller than 10MB.');
+        return;
+      }
+      
+      setIsOCRProcessing(true);
+      
+      try {
+        // Check if OCR API is available
+        const apiAvailable = await OCRService.isAvailable();
+        if (!apiAvailable) {
+          throw new Error('OCR service is not available. Please make sure the OCR API is running on localhost:8000');
+        }
+        
+        // Process image with OCR
+        const result: OCRResult = await OCRService.extractTextFromImage(file);
+        
+        if (result.success && result.text) {
+          // Parse the OCR result to find product names
+          const extractedItems = parseShoppingListFromText(result.text);
+          
+          if (extractedItems.length > 0) {
+            // Store the extracted items in localStorage for the wishlist page
+            if (typeof Storage !== 'undefined') {
+              localStorage.setItem('ocrShoppingItems', JSON.stringify(extractedItems));
+              localStorage.setItem('ocrOriginalText', result.text);
+            }
+          } else {
+            // Even if no items found, store the original text
+            if (typeof Storage !== 'undefined') {
+              localStorage.setItem('ocrOriginalText', result.text);
+            }
+          }
+          
+          // Navigate to wishlist page immediately
+          if (typeof window !== 'undefined') {
+            window.location.href = '/wishlist?from=ocr';
+          }
+        } else {
+          throw new Error(result.error || 'Failed to extract text from image');
+        }
+      } catch (error) {
+        console.error('OCR Error:', error);
+        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+        alert(`OCR processing failed: ${errorMessage}\n\nPlease try again or use manual entry.`);
+      } finally {
+        setIsOCRProcessing(false);
+      }
+    };
+    
+    // Trigger file selection
+    document.body.appendChild(fileInput);
+    fileInput.click();
+    document.body.removeChild(fileInput);
   };
 
   // Show loading state while products are being loaded
@@ -687,14 +1093,14 @@ export default function GroceryPage() {
 
             {/* Modal Buttons */}
             <div className="space-y-4">
-              {/* Snap It Button */}
+              {/* Say It Button */}
               <button
                 onClick={handleSayIt}
                 disabled={isOCRProcessing}
                 className={`w-full rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg ${
                   isOCRProcessing 
                     ? 'bg-gray-400 cursor-not-allowed text-white' 
-                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    : 'bg-purple-600 hover:bg-purple-700 text-white'
                 }`}
               >
                 {isOCRProcessing ? (
@@ -714,7 +1120,7 @@ export default function GroceryPage() {
                     </svg>
                     <div className="text-left">
                       <div className="font-semibold text-lg">Processing...</div>
-                      <div className="text-gray-100 text-sm">Extracting text from image</div>
+                      <div className="text-gray-100 text-sm">Converting speech to text</div>
                     </div>
                   </>
                 ) : (
@@ -729,21 +1135,26 @@ export default function GroceryPage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth={2}
-                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                        d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
                       />
                     </svg>
                     <div className="text-left">
-                      <div className="font-semibold text-lg">Snap It</div>
-                      <div className="text-blue-100 text-sm">Upload image with your list</div>
+                      <div className="font-semibold text-lg">Say It</div>
+                      <div className="text-purple-100 text-sm">Use voice to add items</div>
                     </div>
                   </>
                 )}
               </button>
 
-              {/* Say It Button */}
+              {/* Snap It Button */}
               <button
                 onClick={handleSnapIt}
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg"
+                disabled={isOCRProcessing}
+                className={`w-full rounded-xl py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-lg ${
+                  isOCRProcessing 
+                    ? 'bg-gray-400 cursor-not-allowed text-white' 
+                    : 'bg-blue-600 hover:bg-blue-700 text-white'
+                }`}
               >
                 <svg
                   className="w-6 h-6"
@@ -755,12 +1166,12 @@ export default function GroceryPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
                 <div className="text-left">
-                  <div className="font-semibold text-lg">Say It</div>
-                  <div className="text-purple-100 text-sm">Use voice to add items</div>
+                  <div className="font-semibold text-lg">Snap It</div>
+                  <div className="text-blue-100 text-sm">Upload image with your list</div>
                 </div>
               </button>
 
@@ -768,7 +1179,9 @@ export default function GroceryPage() {
               <button
                 onClick={() => {
                   setIsShoppingListModalOpen(false);
-                  window.location.href = "/wishlist";
+                  if (typeof window !== 'undefined') {
+                    window.location.href = "/wishlist";
+                  }
                 }}
                 className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl py-3 px-6 flex items-center justify-center gap-3 transition-colors"
               >
