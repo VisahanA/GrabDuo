@@ -11,13 +11,39 @@ export default function GroceryPage() {
   const { addItem, totalItems, items, updateQuantity, removeItem } = useCart();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
   const itemsPerPage = 15;
 
-  // Calculate pagination
-  const totalPages = Math.ceil(products.length / itemsPerPage);
+  // Filter products based on search query
+  const filteredProducts = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return products;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return products.filter(product => 
+      product.name.toLowerCase().includes(query) ||
+      product.badge.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  // Calculate pagination based on filtered products
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-  const currentProducts = products.slice(startIndex, endIndex);
+  const currentProducts = filteredProducts.slice(startIndex, endIndex);
+
+  // Reset to first page when search changes
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1);
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setCurrentPage(1);
+  };
 
   // Generate page numbers for pagination
   const pageNumbers = useMemo(() => {
@@ -160,7 +186,32 @@ export default function GroceryPage() {
                 type="text"
                 placeholder="Search for groceries..."
                 className="w-full pl-10 pr-20 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                value={searchQuery}
+                onChange={handleSearchChange}
               />
+              
+              {/* Clear Search Button */}
+              {searchQuery && (
+                <button
+                  onClick={handleClearSearch}
+                  className="absolute right-16 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                  title="Clear search"
+                >
+                  <svg
+                    className="w-4 h-4 text-gray-400 hover:text-gray-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
 
               {/* Right side icons */}
               <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center gap-2">
@@ -209,16 +260,50 @@ export default function GroceryPage() {
         {/* Product Count Info */}
         <div className="flex justify-between items-center mb-4">
           <p className="text-gray-600">
-            Showing {startIndex + 1}-{Math.min(endIndex, products.length)} of {products.length} products
+            Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} products
           </p>
           <p className="text-sm text-gray-500">
             Page {currentPage} of {totalPages}
           </p>
         </div>
 
+        {/* No Results Message */}
+        {filteredProducts.length === 0 && searchQuery && (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg
+                className="w-16 h-16 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              No products found
+            </h3>
+            <p className="text-gray-600 mb-4">
+              No products match your search for "{searchQuery}". Try searching for something else.
+            </p>
+            <button
+              onClick={handleClearSearch}
+              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
+
         {/* Product Grid - 2 columns for mobile */}
-        <div className="grid grid-cols-2 gap-3">
-          {currentProducts.map((product) => (
+        {filteredProducts.length > 0 && (
+          <div className="grid grid-cols-2 gap-3">
+            {currentProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200"
@@ -268,7 +353,8 @@ export default function GroceryPage() {
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (

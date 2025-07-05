@@ -399,6 +399,10 @@
     right: calc(var(--spacing) * 4);
   }
 
+  .right-16 {
+    right: calc(var(--spacing) * 16);
+  }
+
   .bottom-0 {
     bottom: calc(var(--spacing) * 0);
   }
@@ -1182,6 +1186,14 @@
     padding-block: calc(var(--spacing) * 12);
   }
 
+  .pr-4 {
+    padding-right: calc(var(--spacing) * 4);
+  }
+
+  .pr-10 {
+    padding-right: calc(var(--spacing) * 10);
+  }
+
   .pr-20 {
     padding-right: calc(var(--spacing) * 20);
   }
@@ -1440,6 +1452,18 @@
   @media (hover: hover) {
     .hover\:bg-red-700:hover {
       background-color: var(--color-red-700);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-gray-600:hover {
+      color: var(--color-gray-600);
+    }
+  }
+
+  @media (hover: hover) {
+    .hover\:text-gray-700:hover {
+      color: var(--color-gray-700);
     }
   }
 

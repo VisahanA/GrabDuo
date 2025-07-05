@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 export default function WishlistPage() {
   const [selectedItems, setSelectedItems] = useState<number[]>([]);
   const [showToast, setShowToast] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const wishlistItems = [
     {
@@ -54,6 +55,29 @@ export default function WishlistPage() {
       description: "Ripe avocados, perfect for toast or salads"
     }
   ];
+
+  // Filter items based on search query
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return wishlistItems;
+    }
+    
+    const query = searchQuery.toLowerCase();
+    return wishlistItems.filter(item => 
+      item.name.toLowerCase().includes(query) ||
+      item.badge.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchQuery("");
+  };
 
   const showToastMessage = (message: string) => {
     setShowToast(message);
@@ -178,9 +202,57 @@ export default function WishlistPage() {
             </div>
           </div>
         </div>
+        
+        {/* Search Box */}
+        <div className="mt-4 mb-4">
+          <div className="relative">
+            <svg
+              className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search shopping list items..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-10 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            />
+            {searchQuery && (
+              <button
+                onClick={handleClearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded-md transition-colors"
+                title="Clear search"
+              >
+                <svg
+                  className="w-4 h-4 text-gray-400 hover:text-gray-600"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            )}
+          </div>
+        </div>
+        
         <div className="flex items-center justify-between">
           <p className="text-gray-600">
-            {selectedItems.length} of {wishlistItems.length} items selected
+            {selectedItems.length} of {filteredItems.length} items selected
           </p>
           {selectedItems.length > 0 && (
             <div className="flex items-center gap-2 text-green-600">
@@ -205,9 +277,43 @@ export default function WishlistPage() {
         </div>
       )}
 
+      {/* No Results Message */}
+      {filteredItems.length === 0 && searchQuery && (
+        <div className="text-center py-12">
+          <div className="text-gray-400 mb-4">
+            <svg
+              className="w-16 h-16 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            No items found
+          </h3>
+          <p className="text-gray-600 mb-4">
+            No items match your search for "{searchQuery}". Try searching for something else.
+          </p>
+          <button
+            onClick={handleClearSearch}
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Clear Search
+          </button>
+        </div>
+      )}
+
       {/* Wishlist Items */}
-      <div className="space-y-4">
-        {wishlistItems.map((item) => (
+      {filteredItems.length > 0 && (
+        <div className="space-y-4">
+          {filteredItems.map((item) => (
           <div
             key={item.id}
             className={`bg-white rounded-xl shadow-sm border border-gray-100 p-4 transition-all duration-200 ${
@@ -254,12 +360,9 @@ export default function WishlistPage() {
               <div className="flex-1">
                 <div className="flex items-start justify-between">
                   <div>
-                    <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                    <h3 className="font-semibold text-gray-900 text-lg mb-2">
                       {item.name}
                     </h3>
-                    <p className="text-gray-600 text-sm mb-2">
-                      {item.description}
-                    </p>
                     <span
                       className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(item.badge)}`}
                     >
@@ -296,7 +399,8 @@ export default function WishlistPage() {
             </div>
           </div>
         ))}
-      </div>
+        </div>
+      )}
 
       {/* Action Buttons */}
       {selectedItems.length > 0 && (
