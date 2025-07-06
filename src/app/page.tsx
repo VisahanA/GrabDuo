@@ -670,32 +670,122 @@ export default function GroceryPage() {
     }
   };
 
-  // Helper function to parse shopping list from OCR text
+  // Enhanced helper function to parse shopping list from text (STT/OCR)
   const parseShoppingListFromText = (text: string): string[] => {
-    const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    console.log('🛒 Parsing shopping list from text:', text);
+    
     const items: string[] = [];
     
+    // Step 1: Clean the raw text first
+    let cleanedText = text
+      .replace(/^\[|\]$/g, '') // Remove outer brackets
+      .replace(/^"(.*)"$/g, '$1') // Remove outer quotes
+      .trim();
+    
+    console.log('🛒 Cleaned text:', cleanedText);
+    
+    // Step 2: Try different splitting methods
+    let rawItems: string[] = [];
+    
+    // Method 1: Split by newlines first
+    const lines = cleanedText.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    
     for (const line of lines) {
-      // Remove common list markers (-, *, •, numbers)
-      const cleanLine = line.replace(/^[-*•]\s*/, '').replace(/^\d+\.?\s*/, '').trim();
+      // Check if line contains multiple items separated by common delimiters
+      if (line.includes(',') || line.includes(';') || line.includes(' and ')) {
+        // Split by multiple delimiters
+        const splitItems = line.split(/[,;]|\s+and\s+/i)
+          .map(item => item.trim())
+          .filter(item => item.length > 0);
+        rawItems.push(...splitItems);
+      } else {
+        // Single item per line
+        rawItems.push(line);
+      }
+    }
+    
+    // Method 2: If no newlines, try splitting by common delimiters
+    if (rawItems.length === 0 || (rawItems.length === 1 && rawItems[0].length > 100)) {
+      const singleLineItems = cleanedText.split(/[,;]|\s+and\s+/i)
+        .map(item => item.trim())
+        .filter(item => item.length > 0);
       
-      if (cleanLine.length > 2 && cleanLine.length < 50) {
-        // Filter out non-product lines (like titles, headers, etc.)
-        const lowerLine = cleanLine.toLowerCase();
-        if (!lowerLine.includes('shopping') && 
-            !lowerLine.includes('list') && 
-            !lowerLine.includes('grocery') &&
-            !lowerLine.includes('store') &&
-            !lowerLine.includes('buy') &&
-            !lowerLine.match(/^\d+$/) && // Just numbers
-            !lowerLine.match(/^[a-z]\.$/) // Single letters
+      if (singleLineItems.length > 1) {
+        rawItems = singleLineItems;
+      } else {
+        rawItems = [cleanedText.trim()];
+      }
+    }
+    
+    // Method 3: If still no items or appears to be space-separated single words
+    if (rawItems.length === 0 || (rawItems.length === 1 && !rawItems[0].includes(',') && !rawItems[0].includes(';'))) {
+      // Check if it looks like space-separated items (each word could be an item)
+      const spaceItems = cleanedText.split(/\s+/)
+        .map(item => item.trim())
+        .filter(item => item.length > 1);
+      
+      // If we have multiple single words, treat each as a separate item
+      if (spaceItems.length > 1 && spaceItems.every(item => item.length < 20)) {
+        rawItems = spaceItems;
+        console.log('🛒 Using space-separated parsing for items:', spaceItems);
+      }
+    }
+    
+    // Step 3: Clean and filter items
+    for (const rawItem of rawItems) {
+      // Remove common list markers and prefixes
+      let cleanItem = rawItem
+        .replace(/^[-*•]\s*/, '') // Remove bullet points
+        .replace(/^\d+\.?\s*/, '') // Remove numbers
+        .replace(/^(item\s*\d+:?\s*)/i, '') // Remove "item 1:", "item 2:", etc.
+        .replace(/^(buy\s+)/i, '') // Remove "buy"
+        .replace(/^(get\s+)/i, '') // Remove "get"
+        .replace(/^(need\s+)/i, '') // Remove "need"
+        .replace(/^(shopping\s+list:?\s*)/i, '') // Remove "shopping list:"
+        .replace(/^(grocery\s+list:?\s*)/i, '') // Remove "grocery list:"
+        .replace(/[\[\]"',.:!?;]$/g, '') // Remove brackets, quotes, commas, and punctuation from end
+        .replace(/^[\[\]"',.:!?;]/g, '') // Remove brackets, quotes, commas, and punctuation from start
+        .replace(/[\[\]"',]/g, '') // Remove brackets, quotes, and commas from anywhere in the string
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim();
+      
+      console.log('🛒 Cleaning item:', `"${rawItem}" -> "${cleanItem}"`);
+      
+      // Skip empty items after cleaning
+      if (!cleanItem) continue;
+      
+      // Filter valid items
+      if (cleanItem.length > 1 && cleanItem.length < 50) {
+        const lowerItem = cleanItem.toLowerCase();
+        
+        // Skip common non-product phrases
+        if (!lowerItem.includes('shopping') && 
+            !lowerItem.includes('list') && 
+            !lowerItem.includes('grocery') &&
+            !lowerItem.includes('store') &&
+            !lowerItem.includes('market') &&
+            !lowerItem.includes('buy') &&
+            !lowerItem.includes('need') &&
+            !lowerItem.includes('get') &&
+            !lowerItem.includes('item') &&
+            !lowerItem.match(/^\d+$/) && // Just numbers
+            !lowerItem.match(/^[a-z]\.$/) && // Single letters
+            !lowerItem.match(/^(the|and|or|but|for|with|from|to|of|in|on|at|by)$/i) // Common articles/prepositions
         ) {
-          items.push(cleanLine);
+          // Capitalize first letter for better presentation
+          const finalItem = cleanItem.charAt(0).toUpperCase() + cleanItem.slice(1);
+          items.push(finalItem);
         }
       }
     }
     
-    return items.slice(0, 20); // Limit to 20 items
+    // Remove duplicates (case-insensitive)
+    const uniqueItems = items.filter((item, index) => 
+      items.findIndex(i => i.toLowerCase() === item.toLowerCase()) === index
+    );
+    
+    console.log('🛒 Parsed items:', uniqueItems);
+    return uniqueItems.slice(0, 20); // Limit to 20 items
   };
 
   const handleSnapIt = async () => {

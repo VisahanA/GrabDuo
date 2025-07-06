@@ -9,6 +9,7 @@ import { useCart } from "../cart/CartContext";
 export default function WishlistPage() {
   const [newItemInput, setNewItemInput] = useState("");
   const [shoppingList, setShoppingList] = useState<string[]>([]);
+  const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
   const [isCurateMode, setIsCurateMode] = useState(false);
   const [curatedProducts, setCuratedProducts] = useState<Product[]>([]);
   const [toast, setToast] = useState<string>("");
@@ -51,6 +52,7 @@ export default function WishlistPage() {
             try {
               const ocrItems: string[] = JSON.parse(ocrItemsJson);
               setShoppingList(ocrItems);
+              setCheckedItems(new Array(ocrItems.length).fill(false)); // Initialize checkboxes as unchecked
               
               // Clear the localStorage data after loading
               localStorage.removeItem('ocrShoppingItems');
@@ -78,6 +80,7 @@ export default function WishlistPage() {
   const handleAddItem = () => {
     if (newItemInput.trim()) {
       setShoppingList(prev => [...prev, newItemInput.trim()]);
+      setCheckedItems(prev => [...prev, false]); // Add unchecked state for new item
       setNewItemInput("");
     }
   };
@@ -90,6 +93,13 @@ export default function WishlistPage() {
 
   const handleRemoveItem = (index: number) => {
     setShoppingList(prev => prev.filter((_, i) => i !== index));
+    setCheckedItems(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleToggleItem = (index: number) => {
+    setCheckedItems(prev => 
+      prev.map((checked, i) => i === index ? !checked : checked)
+    );
   };
 
   const handleClearInput = () => {
@@ -278,24 +288,7 @@ export default function WishlistPage() {
           </h1>
         </div>
         
-        {/* OCR Success Banner */}
-        {fromOcr && (
-          <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-3">
-              <div className="flex-shrink-0">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-green-800">✨ Items Added from Your Image!</h3>
-                <p className="text-sm text-green-700 mt-1">
-                  We've automatically extracted and added items from your uploaded image to your shopping list.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
+
       </div>
 
       {!isCurateMode ? (
@@ -368,8 +361,15 @@ export default function WishlistPage() {
                   className="bg-white rounded-lg shadow-sm border border-gray-100 p-4 flex items-center justify-between hover:shadow-md transition-shadow"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-gray-900 font-medium">{item}</span>
+                    <label className="flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={checkedItems[index] || false}
+                        onChange={() => handleToggleItem(index)}
+                        className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500 focus:ring-2 transition-colors"
+                      />
+                    </label>
+                    <span className={`font-medium ${checkedItems[index] ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{item}</span>
                   </div>
                   <button
                     onClick={() => handleRemoveItem(index)}
