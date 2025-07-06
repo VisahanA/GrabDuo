@@ -12,6 +12,7 @@ export default function WishlistPage() {
   const [checkedItems, setCheckedItems] = useState<boolean[]>([]);
   const [isCurateMode, setIsCurateMode] = useState(false);
   const [curatedProducts, setCuratedProducts] = useState<Product[]>([]);
+  const [curatedProductsByItem, setCuratedProductsByItem] = useState<{[key: string]: Product[]}>({});
   const [toast, setToast] = useState<string>("");
   const [allProducts, setAllProducts] = useState<Product[]>(products);
   const [isLoadingProducts, setIsLoadingProducts] = useState(true);
@@ -109,6 +110,106 @@ export default function WishlistPage() {
   const showToast = (message: string) => {
     setToast(message);
     setTimeout(() => setToast(""), 3000);
+  };
+
+  // Enhanced confidence-based search function for individual item curation
+  const enhancedCurationSearchByItem = (products: Product[], shoppingItems: string[]): {[key: string]: Product[]} => {
+    const resultsByItem: {[key: string]: Product[]} = {};
+    
+    shoppingItems.forEach(item => {
+      const itemResults = enhancedCurationSearchSingleItem(products, item);
+      resultsByItem[item] = itemResults.slice(0, 10); // Limit to 10 products per item
+    });
+    
+    return resultsByItem;
+  };
+
+  // Enhanced confidence-based search function for single item
+  const enhancedCurationSearchSingleItem = (products: Product[], searchItem: string): Product[] => {
+    const keywords = searchItem.toLowerCase().trim().split(/\s+/).filter(keyword => keyword.length > 0);
+    if (keywords.length === 0) return [];
+    
+    const allResults = new Map<number, { product: Product, confidence: number }>();
+    
+    products.forEach(product => {
+      let totalScore = 0;
+      let maxPossibleScore = 0;
+      
+      // Define field weights (importance)
+      const fields = [
+        { content: product.name.toLowerCase(), weight: 40 }, // Name is most important
+        { content: product.brands?.toLowerCase() || '', weight: 25 }, // Brand is second
+        { content: product.badge.toLowerCase(), weight: 20 }, // Category is third
+        { content: product.categories?.toLowerCase() || '', weight: 10 }, // Categories
+        { content: product.unitQuantity?.toLowerCase() || '', weight: 3 }, // Quantity
+        { content: product.countries?.toLowerCase() || '', weight: 2 } // Countries least important
+      ];
+      
+      keywords.forEach(keyword => {
+        let keywordScore = 0;
+        let keywordMaxScore = 0;
+        
+        fields.forEach(field => {
+          if (!field.content) return;
+          
+          keywordMaxScore += field.weight;
+          
+          // Exact match in field (highest score)
+          if (field.content === keyword) {
+            keywordScore += field.weight * 1.0;
+          }
+          // Field starts with keyword (very high score)
+          else if (field.content.startsWith(keyword)) {
+            keywordScore += field.weight * 0.9;
+          }
+          // Field contains keyword as whole word (high score)
+          else if (field.content.includes(` ${keyword} `) || field.content.includes(`${keyword} `) || field.content.includes(` ${keyword}`)) {
+            keywordScore += field.weight * 0.8;
+          }
+          // Field contains keyword as substring (medium score)
+          else if (field.content.includes(keyword)) {
+            keywordScore += field.weight * 0.6;
+          }
+          // Fuzzy match - keyword contains part of field words or vice versa (low score)
+          else {
+            const fieldWords = field.content.split(/\s+/).filter(word => word.length > 2);
+            const fuzzyMatch = fieldWords.some(word => {
+              // Check if keyword and word share significant overlap
+              if (keyword.length >= 3 && word.length >= 3) {
+                return keyword.includes(word.slice(0, Math.min(3, word.length))) ||
+                       word.includes(keyword.slice(0, Math.min(3, keyword.length))) ||
+                       keyword.includes(word.slice(-3)) ||
+                       word.includes(keyword.slice(-3));
+              }
+              return false;
+            });
+            
+            if (fuzzyMatch) {
+              keywordScore += field.weight * 0.3;
+            }
+          }
+        });
+        
+        totalScore += keywordScore;
+        maxPossibleScore += keywordMaxScore;
+      });
+      
+      // Calculate confidence percentage
+      const confidence = maxPossibleScore > 0 ? (totalScore / maxPossibleScore) * 100 : 0;
+      
+      // Only consider products with >50% confidence
+      if (confidence > 50) {
+        const existing = allResults.get(product.id);
+        if (!existing || confidence > existing.confidence) {
+          allResults.set(product.id, { product, confidence });
+        }
+      }
+    });
+    
+    // Return products sorted by confidence descending
+    return Array.from(allResults.values())
+      .sort((a, b) => b.confidence - a.confidence)
+      .map(item => item.product);
   };
 
   // Enhanced confidence-based search function for curation
@@ -209,15 +310,24 @@ export default function WishlistPage() {
       return;
     }
 
-    // Use enhanced search for better product matching
-    const matchedProducts = enhancedCurationSearch(allProducts, shoppingList);
-    setCuratedProducts(matchedProducts.slice(0, 20)); // Show top 20 results
+    // Get only checked items for curation
+    const checkedShoppingItems = shoppingList.filter((_, index) => checkedItems[index]);
+    
+    if (checkedShoppingItems.length === 0) {
+      showToast("Please check at least one item to curate products!");
+      return;
+    }
+
+    // Use enhanced search for better product matching with only checked items
+    const productsByItem = enhancedCurationSearchByItem(allProducts, checkedShoppingItems);
+    setCuratedProductsByItem(productsByItem);
     setIsCurateMode(true);
   };
 
   const handleBackToList = () => {
     setIsCurateMode(false);
     setCuratedProducts([]);
+    setCuratedProductsByItem({});
   };
 
   const handleAddToCart = (product: any) => {
@@ -264,31 +374,31 @@ export default function WishlistPage() {
 
       {/* Header */}
       <div className="mb-6">
-        <div className="flex items-center gap-2">
-          <Link
-            href="/"
-            className="p-1 hover:bg-green-100 rounded-lg transition-colors"
-          >
-            <svg
-              className="w-6 h-6 text-green-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+        {!isCurateMode && (
+          <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="p-1 hover:bg-green-100 rounded-lg transition-colors"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
-          </Link>
-          <h1 className="text-2xl font-bold text-gray-900">
-            {isCurateMode ? "Curated Products" : "Shopping List"}
-          </h1>
-        </div>
-        
-
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </Link>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Shopping List
+            </h1>
+          </div>
+        )}
       </div>
 
       {!isCurateMode ? (
@@ -369,7 +479,7 @@ export default function WishlistPage() {
                         className="w-4 h-4 text-green-600 bg-white border-gray-300 rounded focus:ring-green-500 focus:ring-2 transition-colors"
                       />
                     </label>
-                    <span className={`font-medium ${checkedItems[index] ? 'text-gray-500 line-through' : 'text-gray-900'}`}>{item}</span>
+                    <span className="text-gray-900 font-medium">{item}</span>
                   </div>
                   <button
                     onClick={() => handleRemoveItem(index)}
@@ -468,7 +578,12 @@ export default function WishlistPage() {
                       d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"
                     />
                   </svg>
-                  Curate Shopping List
+                  Curate Checked Items
+                  {checkedItems.filter(Boolean).length > 0 && (
+                    <span className="ml-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                      {checkedItems.filter(Boolean).length}
+                    </span>
+                  )}
                 </>
               )}
             </button>
@@ -507,163 +622,202 @@ export default function WishlistPage() {
             </button>
           </div>
 
-          {/* Curated Products */}
-          {curatedProducts.length > 0 ? (
+          {/* Curated Products By Item */}
+          {Object.keys(curatedProductsByItem).length > 0 ? (
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Recommended Products ({curatedProducts.length})
-              </h3>
-              <p className="text-gray-600 mb-6">
-                Based on your shopping list, we found these matching products:
-              </p>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {curatedProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow"
-                  >
-                    <div className="flex items-center gap-4">
-                      {/* Product Visual */}
-                      <div
-                        className={`w-16 h-16 bg-gradient-to-br ${product.color} rounded-xl flex items-center justify-center flex-shrink-0`}
-                      >
-                        <div className="text-2xl">
-                          {product.icon}
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-semibold text-gray-900 text-lg mb-2">
-                              {product.name}
-                            </h4>
-                            <span
-                              className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(product.badge)}`}
-                            >
-                              {product.badge}
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="font-bold text-green-600 text-xl">
-                              {product.price}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Quantity Controls */}
-                      {(() => {
-                        const cartItem = items.find(item => item.id === product.id);
-                        const quantity = cartItem ? cartItem.quantity : 0;
-                        
-                        if (quantity === 0) {
-                          return (
-                            <button
-                              onClick={() => handleIncreaseQuantity(product)}
-                              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                              title="Add to cart"
-                            >
-                              <svg
-                                className="w-5 h-5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                                />
-                              </svg>
-                              <span className="text-sm">Add</span>
-                            </button>
-                          );
-                        }
-                        
-                        return (
-                          <div className="flex items-center gap-1 bg-gray-50 rounded-lg p-1">
-                            <button
-                              onClick={() => handleDecreaseQuantity(product)}
-                              className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors flex-shrink-0"
-                              title="Decrease quantity"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M20 12H4"
-                                />
-                              </svg>
-                            </button>
-                            <span className="px-2 py-1 text-gray-900 font-bold text-sm min-w-[28px] text-center flex-shrink-0">
-                              {quantity}
-                            </span>
-                            <button
-                              onClick={() => handleIncreaseQuantity(product)}
-                              className="w-7 h-7 flex items-center justify-center bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex-shrink-0"
-                              title="Increase quantity"
-                            >
-                              <svg
-                                className="w-3 h-3"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={3}
-                                  d="M12 4v16m8-8H4"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                        );
-                      })()}
-                    </div>
-                  </div>
-                                  ))}
-                </div>
-                
-                {/* Go to Cart Button */}
-                {items.length > 0 && (
-                  <div className="text-center">
-                    <Link
-                      href="/cart"
-                      className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+              <div className="mb-6">
+                <p className="text-gray-600 mb-2">
+                  Based on your checked items, we found these matching products:
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(curatedProductsByItem).map((item, index) => (
+                    <span
+                      key={index}
+                      className="inline-block px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-medium"
                     >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
-                      Go to Cart
-                      {items.length > 0 && (
-                        <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                          {items.reduce((total, item) => total + item.quantity, 0)}
-                        </span>
-                      )}
-                    </Link>
-                  </div>
-                )}
+                      ✓ {item}
+                    </span>
+                  ))}
+                </div>
               </div>
+              
+              {/* Product Rows by Item */}
+              <div className="space-y-8">
+                {Object.entries(curatedProductsByItem).map(([item, products]) => (
+                  <div key={item} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      </div>
+                      <h4 className="text-lg font-semibold text-gray-900">
+                        {item}
+                      </h4>
+                      <span className="text-sm text-gray-500">
+                        ({products.length} matches)
+                      </span>
+                    </div>
+                    
+                    {products.length > 0 ? (
+                      <div className="overflow-x-auto">
+                        <div className="flex gap-4 pb-4" style={{ minWidth: 'fit-content' }}>
+                          {products.map((product) => (
+                            <div
+                              key={product.id}
+                              className="bg-gray-50 rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow flex-shrink-0 w-80"
+                            >
+                              <div className="flex flex-col gap-4">
+                                {/* Product Visual and Price */}
+                                <div className="flex items-center justify-between">
+                                  <div
+                                    className={`w-16 h-16 bg-gradient-to-br ${product.color} rounded-xl flex items-center justify-center flex-shrink-0`}
+                                  >
+                                    <div className="text-2xl">
+                                      {product.icon}
+                                    </div>
+                                  </div>
+                                  <div className="text-right">
+                                    <span className="font-bold text-green-600 text-xl">
+                                      {product.price}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Product Details */}
+                                <div>
+                                  <h4 className="font-semibold text-gray-900 text-lg mb-2">
+                                    {product.name}
+                                  </h4>
+                                  <span
+                                    className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${getBadgeStyles(product.badge)}`}
+                                  >
+                                    {product.badge}
+                                  </span>
+                                </div>
+
+                                {/* Quantity Controls */}
+                                <div className="mt-auto">
+                                  {(() => {
+                                    const cartItem = items.find(item => item.id === product.id);
+                                    const quantity = cartItem ? cartItem.quantity : 0;
+                                    
+                                    if (quantity === 0) {
+                                      return (
+                                        <button
+                                          onClick={() => handleIncreaseQuantity(product)}
+                                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
+                                          title="Add to cart"
+                                        >
+                                          <svg
+                                            className="w-5 h-5"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={2}
+                                              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                                            />
+                                          </svg>
+                                          <span className="text-sm">Add</span>
+                                        </button>
+                                      );
+                                    }
+                                    
+                                    return (
+                                      <div className="flex items-center justify-center gap-1 bg-gray-50 rounded-lg p-1">
+                                        <button
+                                          onClick={() => handleDecreaseQuantity(product)}
+                                          className="w-7 h-7 flex items-center justify-center bg-green-100 text-green-700 rounded-md hover:bg-green-200 transition-colors flex-shrink-0"
+                                          title="Decrease quantity"
+                                        >
+                                          <svg
+                                            className="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={3}
+                                              d="M20 12H4"
+                                            />
+                                          </svg>
+                                        </button>
+                                        <span className="px-2 py-1 text-gray-900 font-bold text-sm min-w-[28px] text-center flex-shrink-0">
+                                          {quantity}
+                                        </span>
+                                        <button
+                                          onClick={() => handleIncreaseQuantity(product)}
+                                          className="w-7 h-7 flex items-center justify-center bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex-shrink-0"
+                                          title="Increase quantity"
+                                        >
+                                          <svg
+                                            className="w-3 h-3"
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                          >
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              strokeWidth={3}
+                                              d="M12 4v16m8-8H4"
+                                            />
+                                          </svg>
+                                        </button>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <p className="text-gray-500">No matching products found for this item.</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+                
+              {/* Go to Cart Button */}
+              {items.length > 0 && (
+                <div className="text-center mt-8">
+                  <Link
+                    href="/cart"
+                    className="inline-flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors font-medium"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+                      />
+                    </svg>
+                    Go to Cart
+                    {items.length > 0 && (
+                      <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+                        {items.reduce((total, item) => total + item.quantity, 0)}
+                      </span>
+                    )}
+                  </Link>
+                </div>
+              )}
+            </div>
           ) : (
             /* No Matches Found */
             <div className="text-center py-16">
